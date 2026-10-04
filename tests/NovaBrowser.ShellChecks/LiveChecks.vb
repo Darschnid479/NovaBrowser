@@ -74,6 +74,9 @@ Namespace NovaBrowser.ShellChecks
                 Navigate(window, normal, server.BaseAddress & "b", "NOVA test B")
                 Program.CaptureClient(window, Path.Combine(output, "nova-03-loopback-page-client.png"))
                 NativeSnapshot.Capture(window, Path.Combine(output, "nova-03-loopback-page-window.png"))
+                Using image = File.Create(Path.Combine(output, "nova-03-live-engine.png"))
+                    Program.AwaitTask(normal.View.CoreWebView2.CapturePreviewAsync(Microsoft.Web.WebView2.Core.CoreWebView2CapturePreviewImageFormat.Png, image), "capture actual web renderer")
+                End Using
                 ' Deliberately terminate ONLY the WebView2 browser that owns this
                 ' unique temporary user-data directory. Never enumerate or kill
                 ' processes by name, and never use the user's real profile.

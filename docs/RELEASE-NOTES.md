@@ -1,9 +1,7 @@
-# NOVA Browser 0.2.0 / utviklingsutgave
+# NOVA 0.3.0 / development preview
 
-Dette er en releasekladd. Legg inn faktisk Windows-testresultat og byggemiljø før offentlig publisering.
+Native Windows-vindusknapper og responsivt sidefelt. Festing, flytting, duplisering, demping og valgfri suspendering av faner. Lokale adresseforslag uten nettverksbasert autocomplete. Eget nedlastingspanel, fokusmodus, PDF/utskrift og JSON-bokmerkeutveksling. Atomisk profillagring, sikkerhetskopi, spørsmål etter unormal avslutning og forbedret motorfeilhåndtering.
 
-Kildekoden inneholder faner, temaer, førstegangsveiviser, søkevalg, bokmerker og lokal tilstand. Se README og docs/STATUS.md for implementering og begrensninger.
+Windows-bygg og den faktiske WPF/WebView2-integrasjonen er kontrollert i automatiserte tester. Se QUALITY-REPORT.md for presis testdekning. Usignert forhåndsutgave; WebView2 Runtime kreves. Ingen garanti for DRM, samtlige nettsteder eller bedre ytelse/sikkerhet enn etablerte nettlesere.
 
-Kjente eller uavklarte feil må ikke fjernes fra dokumentasjonen bare fordi kompileringen lykkes. Kontroller spesielt rapporten om vindusknapper.
-
-Windows x64. Pakk ut hele Windows-arkivet og behold filene samlet. WebView2 Runtime kreves separat. Dette er ikke en signert installasjonsfil eller en anbefaling om å erstatte din vanlige nettleser.
+Lukk gammel utgave, behold profilen, og pakk ut hele programmet i en ny mappe. Ta en lokal sikkerhetskopi før viktig testing.

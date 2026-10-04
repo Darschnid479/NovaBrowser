@@ -94,6 +94,10 @@ Namespace NovaBrowser.ShellChecks
                 CallMethod(window, "UpdateChrome", True)
                 Dim output = If(args.Length > 0 AndAlso Not args(0).StartsWith("--", StringComparison.Ordinal), Path.GetFullPath(args(0)), Path.Combine(Environment.CurrentDirectory, "artifacts", "wpf"))
                 Directory.CreateDirectory(output)
+                window.Width = 1280
+                window.Height = 820
+                Keyboard.ClearFocus()
+                Pump(5500)
                 For Each theme In New String() {"Midnight", "Dawn", "Forest", "Graphite"}
                     DirectCast(window.FindName("ThemeSetting"), ComboBox).SelectedItem = theme
                     Pump(150)
@@ -103,6 +107,8 @@ Namespace NovaBrowser.ShellChecks
                 DirectCast(window.FindName("ThemeSetting"), ComboBox).SelectedItem = "Midnight"
                 CallMethod(window, "ShowDrawer", "settings")
                 Pump(150)
+                Dim themeBox = DirectCast(window.FindName("ThemeSetting"), ComboBox)
+                Check("settings arrow contrast", FindIcon(themeBox, "ChevronDown").Foreground Is Application.Current.Resources("Text"))
                 CaptureClient(window, Path.Combine(output, "nova-03-settings-client.png"))
                 CallMethod(window, "CloseDrawer")
                 CallMethod(window, "ShowSetup")
@@ -121,6 +127,11 @@ Namespace NovaBrowser.ShellChecks
                 window.Width = 1280
                 window.Height = 820
                 Pump(100)
+                CallMethod(window, "ToggleSidebar")
+                Pump(150)
+                Check("sidebar can be opened on compact desktops", Element(window, "Sidebar").Visibility = Visibility.Visible)
+                CaptureClient(window, Path.Combine(output, "nova-03-tabs-client.png"))
+                NativeSnapshot.Capture(window, Path.Combine(output, "nova-03-tabs-window.png"))
                 If args.Contains("--live") Then LiveChecks.Run(window, output)
                 window.Close()
                 Pump(150)
@@ -147,6 +158,15 @@ Namespace NovaBrowser.ShellChecks
                     End Try
                 Next
             End Try
+        End Function
+        Private Function FindIcon(parent As DependencyObject, kind As String) As NovaIcon
+            Dim icon = TryCast(parent, NovaIcon)
+            If icon IsNot Nothing AndAlso icon.Kind = kind Then Return icon
+            For index As Integer = 0 To VisualTreeHelper.GetChildrenCount(parent) - 1
+                Dim found = FindIcon(VisualTreeHelper.GetChild(parent, index), kind)
+                If found IsNot Nothing Then Return found
+            Next
+            Return Nothing
         End Function
         Friend Function Element(window As MainWindow, name As String) As FrameworkElement
             Return DirectCast(window.FindName(name), FrameworkElement)

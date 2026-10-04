@@ -1,0 +1,1 @@
+PASS: 116 WPF icon/text checks. No browser profile or WebView2 used.

@@ -1,66 +1,58 @@
 <div align="center">
-
-<img src="docs/assets/brand/social-card.png" alt="NOVA Browser. Internett. På din måte. Utviklingsversjon 0.2.0." width="100%">
+<img src="docs/assets/brand/nova-mark.png" width="72" alt="NOVA symbol">
 
 # NOVA Browser
 
-**En personlig Windows-nettleser. Et tydelig eget uttrykk.**
+### Internett. På din måte.
+
+**Et personlig arbeidsområde for nettet. Bygget i Visual Basic .NET.**
 
 [![Windows build](https://github.com/Darschnid479/NovaBrowser/actions/workflows/windows-build.yml/badge.svg)](https://github.com/Darschnid479/NovaBrowser/actions/workflows/windows-build.yml)
-[![Site checks](https://github.com/Darschnid479/NovaBrowser/actions/workflows/site-checks.yml/badge.svg)](https://github.com/Darschnid479/NovaBrowser/actions/workflows/site-checks.yml)
-![Status](https://img.shields.io/badge/status-utviklingsversjon-b1a1ff?style=flat-square)
-![Visual Basic](https://img.shields.io/badge/app-Visual_Basic_.NET-8797d8?style=flat-square)
-[![MIT](https://img.shields.io/badge/lisens-MIT-83e3b8?style=flat-square)](LICENSE)
+![Version](https://img.shields.io/badge/preview-0.3.0-b1a1ff?style=flat-square)
+![Platform](https://img.shields.io/badge/Windows-x64-8797d8?style=flat-square)
+[![MIT](https://img.shields.io/badge/license-MIT-83e3b8?style=flat-square)](LICENSE)
 
-[Opplevelsen](#opplevelsen) &nbsp; / &nbsp; [Bilder](#bilder) &nbsp; / &nbsp; [Kom i gang](#kom-i-gang) &nbsp; / &nbsp; [Veikart](docs/ROADMAP.md) &nbsp; / &nbsp; [Bidra](CONTRIBUTING.md)
-
+[Opplevelsen](#opplevelsen) · [Ekte appbilder](#ekte-appbilder) · [Kom i gang](#kom-i-gang) · [Testbevis](docs/QUALITY-REPORT.md) · [Veikart](docs/ROADMAP.md)
 </div>
 
-> **Status: 0.2.0 / utviklingsversjon.** Appen er et VB.NET/WPF-grensesnitt rundt Microsoft WebView2, ikke en ny nettmotor. Byggeindikatorene viser faktiske GitHub Actions-resultater når workflowene er kjørt. Ingen påstand om bedre ytelse eller sikkerhet enn Chrome og Firefox er dokumentert.
+> **0.3.0 / utviklingsversjon.** Windows-bygging og automatiserte tester er kjørt, inkludert den faktiske nettmotoren. NOVA bruker Microsoft WebView2; dette er ikke en ny nettmotor eller dokumentert raskere/sikrere enn Chrome og Firefox. [Den konkrete valideringskjøringen](https://github.com/Darschnid479/NovaBrowser/actions/runs/37202764701).
 
 ## Opplevelsen
 
-En nettleser er et sted du tilbringer mye tid. NOVA utforsker hvordan dette stedet kan bli mer personlig, med synlige faner, et rolig arbeidsområde og innstillinger som starter med dine valg.
+NOVA skal være et sted der fanene er ryddige, uttrykket er ditt og vanlige handlinger sitter i fingrene. 0.3.0 prioriterer det som gjør en nettleser brukbar over tid: fungerende vindusbetjening, robust lagring og kontroll over faner og nedlastinger.
 
-**Ambisjonen er å bli et alternativ du vil velge fremfor Chrome og Firefox.** Først må NOVA fortjene den plassen gjennom pålitelighet, god betjening og etterprøvbar testing.
-
-| Oversikt | Personlighet | Dine valg |
+| Arbeidsflyt | Personlighet | Pålitelighet |
 | --- | --- | --- |
-| Vertikale faner og private faner | Midnight, Dawn, Forest og Graphite | Google, DuckDuckGo eller Bing |
-| Gjenåpne lukkede vanlige faner | Seks aksentfarger og tre bakgrunner | Veiviser ved første oppstart |
-| Bokmerker og lokal besøksliste | Animasjoner som kan slås av | Gjenoppretting av vanlige faner |
-| Kommandofelt med `Ctrl+K` | Personlig navn og klokke | Innstillinger lagres lokalt |
+| Fest, flytt, dupliser og demp faner | Fire temaer og seks aksentfarger | Ekte Windows-knapper for lukk, minimer og maksimer |
+| Lokale adresseforslag fra faner og bokmerker | Eget førstegangsoppsett | Atomisk profillagring med siste gyldige sikkerhetskopi |
+| Nedlastingspanel med pause/fortsett/avbryt | Fokusmodus med `Ctrl+Shift+F` | Spør om gjenoppretting etter unormal avslutning |
+| PDF/utskrift og JSON-bokmerkeutveksling | Sidefelt som tilpasses vindusbredden | Isolerte automatiske tester av privat lagring og motorfeil |
 
-Dette beskriver **implementert kildekode**, ikke en erklæring om at alle funksjoner er ferdig testet. Se [status og kjente begrensninger](docs/STATUS.md).
+**Høyreklikk en fane** for faneverktøyene. Skriv i adressefeltet for lokale forslag; ingenting sendes til en søkeforslagstjeneste mens du skriver. Automatiske hvilende faner er **av som standard** og kan aktiveres i innstillingene. Bakgrunnsoppdateringer kan pauses, og minnebesparelse er ikke garantert.
 
-## Bilder
+## Ekte appbilder
 
-### Startside / Midnight
+<img src="docs/assets/app-0.3.0/nova-03-tabs-window.png" width="100%" alt="NOVA 0.3.0 fra den kjørende Windows-appen, med Midnight-tema">
 
-<img src="docs/assets/previews/nova-midnight.png" alt="Merket HTML-rekonstruksjon av NOVA-startsiden med Midnight-tema." width="100%">
+Bildene er produsert av den faktiske WPF-appen på en isolert Windows-testmaskin. Filer med `-window` er native PrintWindow-opptak; `-client` er rendering av den levende WPF-klientflaten uten Windows-tittellinjen. Testdata er ikke en virkelig brukers nettleserhistorikk.
 
-**Designforhåndsvisning, ikke skjermbilde fra Windows-appen.** Rekonstruert i HTML med utgangspunkt i XAML, ikonformene og fargepaletten i 0.2.0. Den faktiske appen kan se annerledes ut; kjente problemer med vindusknapper er ikke verifisert rettet.
+<table><tr>
+<td width="50%"><img src="docs/assets/app-0.3.0/nova-03-dawn-client.png" alt="Ekte WPF-klientflate i Dawn"><b>Dawn</b><br>Lyst tema, samme arbeidsområde.</td>
+<td width="50%"><img src="docs/assets/app-0.3.0/nova-03-forest-client.png" alt="Ekte WPF-klientflate i Forest"><b>Forest</b><br>Et roligere grønt uttrykk.</td>
+</tr><tr>
+<td><img src="docs/assets/app-0.3.0/nova-03-setup-client.png" alt="Kjørende WPF-veiviser"><b>Førstegangsoppsett</b><br>Valgene begynner hos deg.</td>
+<td><img src="docs/assets/app-0.3.0/nova-03-settings-client.png" alt="Kjørende WPF-innstillinger"><b>Personlig tilpasning</b><br>Tema, søk, økter og ressursvalg.</td>
+</tr></table>
 
-<table>
-<tr>
-<td width="50%"><img src="docs/assets/previews/nova-dawn.png" alt="HTML-designforhåndsvisning av Dawn-tema"><b>Dawn</b><br>Lyst uttrykk / HTML-rekonstruksjon.</td>
-<td width="50%"><img src="docs/assets/previews/nova-forest.png" alt="HTML-designforhåndsvisning av Forest og Mint"><b>Forest + Mint</b><br>Grønn palett / HTML-rekonstruksjon.</td>
-</tr>
-<tr>
-<td width="50%"><img src="docs/assets/previews/nova-setup.png" alt="HTML-designforhåndsvisning av søkemotorvalg i veiviseren"><b>Førstegangsoppsett</b><br>Søkemotorvalg / HTML-rekonstruksjon.</td>
-<td width="50%"><img src="docs/assets/previews/nova-settings.png" alt="HTML-designforhåndsvisning av innstillingspanelet"><b>Innstillinger</b><br>Personlig tilpasning / HTML-rekonstruksjon.</td>
-</tr>
-</table>
+[Reell nettmotor som viser en lokal testside](docs/assets/app-0.3.0/nova-03-live-engine.png) · [Kompakt vindu](docs/assets/app-0.3.0/nova-03-compact-client.png) · [Bildeopprinnelse](docs/VISUELT.md).
 
-**Ekte skjermbilder av landingssiden:** [PC](docs/assets/screenshots/website-desktop.png) / [Mobil](docs/assets/screenshots/website-mobile.png). Disse er tatt ved rendering av den medfølgende nettsiden, ikke av NOVA-appen. [Bildeopprinnelse og fremgangsmåte](docs/VISUELT.md).
-
-For ekte appbilder: start NOVA på Windows og kjør `TA-EKTE-SKJERMBILDE.bat`. Bildet må godkjennes før det flyttes til den publiserbare mappen.
+Designforhåndsvisningene i `docs/assets/previews/` er beholdt som et historisk 0.2.0-arkiv: hver slik HTML-rekonstruksjon er **ikke skjermbilde fra Windows-appen**. De nye 0.3.0-bildene over er ikke HTML-rekonstruksjoner.
 
 ## Kom i gang
 
-### Bygg og prøv appen
+**Ferdig Windows-pakke:** Pakk ut hele mappen, behold alle DLL-filer ved siden av `NOVA.exe`, og start `NOVA.exe`. Den publiserte utviklingspakken inkluderer .NET, men trenger Microsoft WebView2 Runtime separat. Den er usignert og er ikke en ferdig offentlig stabil utgivelse.
 
-Du trenger Windows x64, [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) og [Microsoft WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/). Bruk en Windows-utgave som fortsatt mottar relevante sikkerhetsoppdateringer.
+**Fra kildekode:** Windows x64, .NET 10 SDK og WebView2 Runtime kreves. Åpne `NOVA.sln` i Visual Studio, eller kjør:
 
 ```powershell
 git clone https://github.com/Darschnid479/NovaBrowser.git
@@ -68,68 +60,41 @@ cd NovaBrowser
 .\START-NOVA.cmd
 ```
 
-Nedlastet ZIP? Pakk ut **hele** arkivet og dobbeltklikk `START-NOVA.cmd`. Ikke kjør filer direkte inne i ZIP-vinduet.
+På utviklingsgrenen: `git switch work/nova-0.3.0`. Hovedgrenen endres først ved gjennomgått sammenslåing av endringene.
 
 | Fil | Bruk |
 | --- | --- |
-| `START-NOVA.cmd` | Kontroller, bygg og start appen. |
-| `BYGG-EXE.cmd` | Publiser en komplett Windows x64-mappe til `out\win-x64`. |
-| `TEST-NOVA.cmd` / `TEST-UI.cmd` | Kjør modell-/adressekontroller og Windows UI-kontroller. |
-| `SE-NETTSIDEN.bat` | Åpne landingssiden lokalt. Ingen bygging nødvendig. |
-| `LAST-OPP-NOVA-TIL-GITHUB.bat` | Vis endringer, be om godkjenning og last opp kildepakken. |
-| `TA-EKTE-SKJERMBILDE.bat` | Ta og godkjenn ett ekte bilde av NOVA-vinduet. |
+| `START-NOVA.cmd` | Kontroller, bygg og start. |
+| `BYGG-EXE.cmd` | Lag selvstendig Windows x64-mappe i `out/win-x64`. |
+| `TEST-ALT.cmd` | Bygg, kjør modell-/WPF-tester og valgfri faktisk nettmotortest. |
+| `SE-NETTSIDEN.bat` | Forhåndsvis den medfølgende landingssiden. |
+| `LAST-OPP-NOVA-TIL-GITHUB.bat` | Vis endringer og last opp først etter at du skriver `JA`. |
+| `TA-EKTE-SKJERMBILDE.bat` | Ta og godkjenn et bilde fra din egen NOVA. |
 
-**Kildepakken inneholder ikke en testet EXE, installasjonsfil eller medfølgende runtime.** En publisering med `--self-contained true` inkluderer .NET i resultatmappen, men WebView2 Runtime er fortsatt et eget krav. Behold alle filene i `out\win-x64` samlet.
+**Oppgradering:** Lukk gammel NOVA. Ta gjerne en lokal sikkerhetskopi av `%LOCALAPPDATA%\NOVA-Browser` mens programmet er lukket. Ikke last opp profilen. Pakk ut programmet i en ny mappe uten gamle `bin`, `obj` eller `out`. Eksisterende innstillinger og bokmerker brukes videre. Ikke slett profilen for å oppgradere.
 
-### Last opp til GitHub
-
-`LAST-OPP-NOVA-TIL-GITHUB.bat` er satt opp for **Darschnid479/NovaBrowser**. Den bruker Git på PC-en og lager en separat, midlertidig arbeidskopi av repoet. Deretter legger den inn kildepakken og viser hvilke filer som endres. Skriv `JA` for å godkjenne.
-
-Den endrer ikke din eksisterende lokale Git-historikk, bruker ikke force-push, og sletter ikke filer som bare finnes på GitHub. Filer med samme navn kan oppdateres **etter godkjenning**. Ved avvist push stopper den. Filtrering og en enkel hemmelighetskontroll erstatter ikke din egen gjennomgang.
-
-[Full opplastingsveiledning](docs/maintainers/UPLOAD.md) / [Aktiver GitHub Pages](docs/maintainers/GITHUB-SETUP.md).
-
-## Hurtigtaster
+## Tastaturet ditt er en snarvei
 
 | Handling | Tast |
 | --- | --- |
-| Ny fane / lukk fane | `Ctrl+T` / `Ctrl+W` |
-| Privat fane / gjenåpne lukket vanlig fane | `Ctrl+Shift+N` / `Ctrl+Shift+T` |
+| Ny / lukk fane | `Ctrl+T` / `Ctrl+W` |
+| Privat / gjenåpne vanlig fane | `Ctrl+Shift+N` / `Ctrl+Shift+T` |
 | Adresse / kommandoer | `Ctrl+L` / `Ctrl+K` |
 | Bytt fane | `Ctrl+Tab` / `Ctrl+Shift+Tab` |
-| Bokmerke / historikk / nedlastinger | `Ctrl+D` / `Ctrl+H` / `Ctrl+J` |
-| Vis eller skjul sidefelt | `Ctrl+B` |
+| Historikk / nedlastinger | `Ctrl+H` / `Ctrl+J` |
+| Sidefelt / fokusmodus | `Ctrl+B` / `Ctrl+Shift+F` |
+| Skriv ut / lukk vindu | `Ctrl+P` / `Alt+F4` |
 
-## Bygget med
+## Kvalitet som kan etterprøves
 
-```text
-NOVA.sln
-src/NovaBrowser/       VB.NET-appen, XAML, ikoner, innstillinger og nettmotorintegrasjon
-  UI/                  Felles stiler og temafarger
-  Services/            Adressepolicy, søkeleverandører, lagring og feillogg
-  Models/              Faner, veiviser og lokal tilstand
-tests/                 Adresse-/modellkontroller, WPF UI-kontroller, opplastingstester
-docs/                  Landingsside, visuelle ressurser og prosjektdokumentasjon
-tools/                 Opplasting, skjermbildeverktøy og kildekontroll
-.github/               Bygging, nettsjekk, Pages, releasekladd og saksmaler
-```
+I [den registrerte Windows-kjøringen](https://github.com/Darschnid479/NovaBrowser/actions/runs/37202764701) bestod **407 modell-/policykontroller**, **116 WPF-ikon-/tekstkontroller** og **56 kontroller av faktisk vindu/nettmotor**. Antall kontroller er ikke det samme som antall brukersituasjoner; 256 av policykontrollene dekker kombinasjoner av vilkår for hvilende faner.
 
-[Arkitektur](docs/ARKITEKTUR.md) / [Personvern](docs/PRIVACY.md) / [Sikkerhet](SECURITY.md) / [Endringslogg](CHANGELOG.md).
+Tester bruker egne midlertidige profiler og en HTTP-server bundet til `127.0.0.1`. Motorfeiltesten avslutter kun motorprosessen som tilhører den isolerte testprofilen. Den tester ikke banknettsteder, DRM-strømming, alle nedlastingsdialoger, alle grafikkdrivere eller ytelse mot andre nettlesere.
 
-## Veien videre
+[Full kvalitetsrapport](docs/QUALITY-REPORT.md) · [Kjente begrensninger](docs/STATUS.md) · [Personvern](docs/PRIVACY.md) · [Arkitektur](docs/ARKITEKTUR.md) · [Endringslogg](CHANGELOG.md).
 
-**Nå:** dokumentere og stabilisere funksjonene i 0.2.0. **Neste:** verifisere vindusbetjening, skalering, tastaturflyt og nettleserøkter. **Senere:** vurdere fanegrupper, sovende faner, signerte utgivelser og oppdateringer.
+## Videre retning
 
-Passordbehandler, utvidelsesbutikk, synkronisering, automatisk appoppdatering og ferdig installasjonsprogram er **ikke inkludert**. Se [veikart med kvalitetskrav](docs/ROADMAP.md); ingen frister er lovet.
+Ambisjonen er å fortjene en plass ved siden av etablerte nettlesere. Før neste milepæl prioriteres hverdagsnettsteder, DPI/tilgjengelighet, nedlastingsdialoger, signert distribusjon og målbare ytelsestester. Fanegrupper, flere vinduer, synkronisering, passordbehandler og utvidelser er ikke levert i 0.3.0.
 
-## Bidra
-
-Rapporter en konkret feil med versjon, Windows-versjon og trinn som gjenskaper problemet. Ikke legg ved passord, tokens, profilmappen eller en uredigert privat feillogg. [Bidragsveiledning](CONTRIBUTING.md) / [Ny sak](https://github.com/Darschnid479/NovaBrowser/issues/new/choose).
-
-## Lisens
-
-[MIT](LICENSE). Appens eksisterende lisens er beholdt. .NET, WebView2 og andre avhengigheter har egne vilkår. Ingen fontfiler er inkludert.
-
----
-
-<div align="center"><b>NOVA Browser</b><br>Et personlig utgangspunkt. En stor ambisjon.</div>
+[Bidra](CONTRIBUTING.md) · [Rapporter en feil](https://github.com/Darschnid479/NovaBrowser/issues/new/choose) · [Sikkerhet](SECURITY.md) · [MIT-lisens](LICENSE).

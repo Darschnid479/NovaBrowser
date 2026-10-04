@@ -1,31 +1,17 @@
-# Bilder og opprinnelse
+# Bildeopprinnelse
 
-## Ingen oppdiktede app-skjermbilder
+## Faktisk app / 0.3.0
 
-Pakken har ikke et brukbart, fullstendig skjermbilde av den kjørende NOVA-appen. `assets/previews/` inneholder **HTML-rekonstruksjoner**, tydelig merket nederst i hvert bilde og ved bruk i README/nettsiden. De viser en designstudie basert på kildekoden, ikke dokumentasjon på at vindusbetjening, WebView2 eller andre funksjoner virker.
+`assets/app-0.3.0/` er generert av den kjørende Windows-appen i [denne valideringskjøringen](https://github.com/Darschnid479/NovaBrowser/actions/runs/37202764701), ikke av en HTML-modell eller bildegenerator.
 
-| Ressurs | Hva den viser |
-| --- | --- |
-| `nova-midnight.png` | Startside med Midnight + Iris. |
-| `nova-dawn.png` | Startside med Dawn + Iris. |
-| `nova-forest.png` | Startside med Forest + Mint. |
-| `nova-graphite.png` | Startside med Graphite + Blue. |
-| `nova-setup.png` | Rekonstruert søkemotortrinn. Eksempelvalg, ikke et ekte oppsett. |
-| `nova-settings.png` | Rekonstruert utsnitt av innstillingspanelet. |
+- `*-window.png`: PrintWindow-opptak av appens native Windows-vindu. DWM/grafikkoppsettet på testmaskinen kan påvirke hva metoden tegner.
+- `*-client.png`: RenderTargetBitmap av appens levende WPF-klientflate. Windows sin ytre tittellinje er ikke med.
+- `nova-03-live-engine.png`: WebView2 CapturePreviewAsync av en kontrollert lokal HTTP-testside. Siden beskriver eksplisitt at den er en test. Ingen påstand om at en offentlig nettside ble besøkt.
 
-Farger er hentet fra `src/NovaBrowser/UI/ThemeManager.vb`. Ikonbaner er hentet fra `UI/NovaIcon.vb`. Oppsettet er basert på `MainWindow.xaml`; HTML/CSS er ikke WPF, og geometri, skriftgjengivelse og detaljer kan avvike. Vist tidspunkt og navn er demonstrasjonsverdier, ikke nettleseraktivitet. Søkeleverandørene illustreres med bokstavmerker, ikke lånte varemerkelogoer.
+Bildene bruker testprofil og testdata. [SHA-256 og byggekontekst](validation/0.3.0/evidence.json).
 
-## Ekte skjermbilder av nettsiden
+## Historisk presentasjonsmateriale / 0.2.0
 
-`assets/screenshots/website-desktop.png` og `website-mobile.png` er tatt av den medfølgende HTML-landingssiden, rendret i Chromium ved henholdsvis 1440 og 390 piksler bredde. De er **ikke** skjermbilder fra Windows-appen. Ressursene ble lastet lokalt i minnet under kontrollen; ingen nettsteder ble besøkt av NOVA.
+`assets/previews/` og `preview.html` inneholder tydelig merkede HTML-rekonstruksjoner fra den tidligere presentasjonspakken. Dette er ikke opptak fra Windows-appen. `assets/screenshots/website-*` viser den tidligere HTML-landingssiden. De er ikke dokumentasjon på siste appversjon.
 
-`assets/brand/social-card.png` er et typografisk banner, rendret fra `tools/brand-artwork.html`. Merket er basert på prosjektets eksisterende `Nova.ico`. Ingen fontfiler eller eksterne stockbilder inngår.
-
-## Lag ekte Windows-bilder
-
-1. Start NOVA med `START-NOVA.cmd` og åpne riktig visning. Fjern private adresser og varsler.
-2. Kjør `TA-EKTE-SKJERMBILDE.bat`. Bekreft opptaket og hold NOVA fremst under nedtellingen.
-3. Se bildet som åpnes. Skriv `JA` bare når det trygt kan publiseres. Bildet kopieres da til docs-mappen.
-4. Sett inn filen i README med tekst som angir versjon, tema, Windows-versjon og skalering. Fjern "HTML-rekonstruksjon" **bare for bilder som faktisk er tatt av appen**.
-
-Verktøyet krever Windows og er ikke kjørt i dette byggemiljøet. Det erstatter ikke bildene automatisk, og laster ikke opp noe på egen hånd.
+Et eget lokalt bilde kan tas med `TA-EKTE-SKJERMBILDE.bat`. Skjul private opplysninger og kontroller resultatet før godkjenning.

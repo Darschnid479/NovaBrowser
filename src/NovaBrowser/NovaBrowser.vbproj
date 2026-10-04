@@ -17,13 +17,14 @@
     <OptionInfer>On</OptionInfer>
     <AssemblyName>NOVA</AssemblyName>
     <Product>NOVA Browser</Product>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets/Nova.ico</ApplicationIcon>
     <DebugType>portable</DebugType>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
   <ItemGroup>
+    <Resource Include="Assets/Nova.ico" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
   </ItemGroup>
   <!-- Fail the build instead of delivering a folder known to fail on first navigation. -->

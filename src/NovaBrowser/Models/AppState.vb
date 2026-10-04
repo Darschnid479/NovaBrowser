@@ -14,6 +14,11 @@ Namespace NovaBrowser
         Public Property RestoreSession As Boolean = True
         Public Property RecordHistory As Boolean = True
         Public Property DefaultZoom As Double = 1.0
+        Public Property StartMaximized As Boolean = True
+        Public Property WindowWidth As Double = 1280
+        Public Property WindowHeight As Double = 820
+        Public Property SleepingTabs As Boolean = False
+        Public Property SleepAfterMinutes As Integer = 15
         ' Missing in old JSON => False: existing users also see the wizard once.
         Public Property SetupCompleted As Boolean = False
         Public Function Copy() As BrowserSettings
@@ -45,12 +50,16 @@ Namespace NovaBrowser
     End Class
 
     Public Class SessionEntry
+        Public Property IsPinned As Boolean
+        Public Property IsMuted As Boolean
+        Public Property Zoom As Double = 1.0
         Public Property Title As String = "Ny fane"
         Public Property Url As String = UrlPolicy.HomeUrl
     End Class
 
     Public Class AppState
         Public Property SchemaVersion As Integer = 1
+        Public Property LastExitClean As Boolean = True
         Public Property Settings As BrowserSettings = New BrowserSettings()
         Public Property Bookmarks As List(Of PageEntry) = New List(Of PageEntry) From {
             New PageEntry With {.Title = "DuckDuckGo", .Url = "https://duckduckgo.com/"},

@@ -40,7 +40,8 @@ Namespace NovaBrowser.Checks
             End Try
             Check("unknown schema not silently accepted", rejected)
             For mask As Integer = 0 To 255
-                Dim flags = Enumerable.Range(0, 8).Select(Function(bit) (mask And (1 << bit)) <> 0).ToArray()
+                Dim currentMask = mask
+                Dim flags = Enumerable.Range(0, 8).Select(Function(bit) (currentMask And (1 << bit)) <> 0).ToArray()
                 Check("sleep exclusion mask " & mask, TabSleepPolicy.CanSleep(flags(0), flags(1), flags(2), flags(3), flags(4), flags(5), flags(6), flags(7)) = (mask = 0))
             Next
             Dim now = DateTimeOffset.UtcNow

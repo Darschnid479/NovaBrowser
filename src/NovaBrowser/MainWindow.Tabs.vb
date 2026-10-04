@@ -10,15 +10,17 @@ Namespace NovaBrowser
     Partial Public Class MainWindow
         Private ReadOnly _idleTimer As New DispatcherTimer With {.Interval = TimeSpan.FromSeconds(30)}
         Private _sleepSweepBusy As Boolean
+        Private _sleepPolicyVersion As Integer
 
         Private Sub InitializeTabTools()
             AddHandler _idleTimer.Tick, Async Sub(sender, args) Await SleepIdleTabsAsync()
             ApplySleepPreference()
         End Sub
-        Private Sub ApplySleepPreference()
+        Private Sub ApplySleepPreference(Optional resumeAll As Boolean = False)
             _idleTimer.Stop()
             If Not _isClosing AndAlso _state.Settings.SleepingTabs Then _idleTimer.Start()
-            If Not _state.Settings.SleepingTabs Then
+            If resumeAll Then
+                _sleepPolicyVersion += 1
                 For Each target In _tabs.Where(Function(item) item.IsSleeping).ToArray()
                     WakeTab(target)
                 Next
@@ -46,7 +48,7 @@ Namespace NovaBrowser
             args.Handled = True
         End Sub
         Private Sub AddTabAction(menu As ContextMenu, title As String, action As Action, Optional enabled As Boolean = True)
-            Dim item As New MenuItem With {.Header = title, .IsEnabled = enabled}
+            Dim item As New MenuItem With {.Header = title, .IsEnabled = enabled, .Style = DirectCast(FindResource("NovaMenuItem"), Style)}
             AddHandler item.Click, Sub(sender, args) Dispatcher.BeginInvoke(action)
             menu.Items.Add(item)
         End Sub
@@ -108,12 +110,13 @@ Namespace NovaBrowser
             Dim view = target.View
             Dim core = view.CoreWebView2
             Dim document = target.DocumentVersion
+            Dim policyVersion = _sleepPolicyVersion
             target.SuspendPending = True
             Try
                 Dim suspended = Await core.TrySuspendAsync()
                 If target.Closed OrElse _isClosing OrElse target.View IsNot view Then Return
                 If suspended Then
-                    If target Is _active OrElse target.DocumentVersion <> document OrElse target.HasSensitivePermission OrElse target.IsPlayingAudio OrElse
+                    If target Is _active OrElse policyVersion <> _sleepPolicyVersion OrElse target.DocumentVersion <> document OrElse target.HasSensitivePermission OrElse target.IsPlayingAudio OrElse
                         _downloads.Values.Any(Function(item) item Is target) Then
                         core.Resume()
                     Else
@@ -141,7 +144,7 @@ Namespace NovaBrowser
             _sleepSweepBusy = True
             Try
                 For Each target In _tabs.ToArray()
-                    If _isClosing Then Return
+                    If _isClosing OrElse Not _state.Settings.SleepingTabs Then Return
                     If TabSleepPolicy.IsIdle(target.LastActiveUtc, DateTimeOffset.UtcNow, _state.Settings.SleepAfterMinutes) Then Await SleepTabAsync(target)
                 Next
             Finally

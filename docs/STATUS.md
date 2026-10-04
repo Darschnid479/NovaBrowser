@@ -1,23 +1,19 @@
-# Produktstatus / app 0.2.0
+# Produktstatus / 0.3.0
 
-## Implementert i kildekoden
+Utviklingsversjon med kompilert Windows x64-kandidat og automatisert reell WPF/WebView2-validering. [Konkrete resultater](QUALITY-REPORT.md).
 
-Faner og private faner; adresse-/søkefelt; Google, DuckDuckGo og Bing; bokmerker; NOVAs lokale besøksliste; gjenoppretting av vanlige faner; temaer, aksenter og bakgrunner; kommandofelt; oppstartsveiviser; nettstedsforespørsler og WebView2-integrasjon.
+## Endret i denne versjonen
 
-Dette er kildekodestatus, ikke en godkjenning av funksjonene til daglig bruk.
+Standard Windows-tittellinje med ekte vindusknapper erstatter den feilutsatte egendefinerte rammen. Faner kan festes, flyttes, dupliseres, dempes og pauses. Adresseforslag beregnes lokalt. Nedlastinger har et eget panel. Profillagring er atomisk, med en tidligere gyldig kopi og synlig gjenoppretting etter feil. Private faner lagres ikke som nettleserøkter.
 
-## Kjente eller uavklarte forhold
+## Viktige begrensninger
 
-- Brukeren har rapportert at lukk-/maksimeringsknappene ikke er synlige. Koden inneholder slike kontroller, men problemet i den kjørende appen er **ikke verifisert løst**.
-- Det har tidligere vært kompileringsfeil, manglende runtime-komponenter og ikon-/tekstfeltproblemer. 0.2.0 inneholder tidligere rettelser, men en komplett Windows-test av denne leveransen er ikke utført her.
-- WebView2CompositionControl har dokumenterte begrensninger som kan påvirke bildefrekvens og DRM-avspilling. Se Microsoft-kilden i SOURCES.
-- Det finnes ingen bekreftet sammenlignende ytelses-, sikkerhets- eller minnetest mot Chrome/Firefox.
-- PowerShell-opplastingen og skjermbildeverktøyet krever reell Windows-kjøring. Medfølgende integrasjonstest er konfigurert for Windows Actions; et oppsett er ikke det samme som et bestått testresultat.
+- WebView2CompositionControl kan påvirke bildefrekvens og DRM-avspilling. Dette er ikke en ny nettmotor.
+- Native før-lukking-varsler for ulagrede nettskjemaer er ikke en fullverdig fanelukkingsmekanisme i denne utgaven. Lagre arbeid før faner lukkes.
+- Hvilende faner kan pause live-oppdateringer. Automatisk pause er av som standard og gir ingen garantert minnebesparelse. Faner med lyd, nedlasting, festing eller innvilgede tillatelser holdes utenfor automatisk pause.
+- Nedlastingslisten er for inneværende økt, med opptil åtte aktive nedlastinger og inntil 100 poster. Private poster fjernes når eierfanen lukkes. Nedlastede filer på disken slettes ikke automatisk.
+- JSON-bokmerkeimport støtter NOVAs eksportformat, ikke alle andre nettleseres HTML- eller databaseformater.
+- Ferdigbygget distribusjon er usignert og krever WebView2 Runtime. Ingen automatiske appoppdateringer er implementert.
+- Fanegrupper, passordbehandler, skysynkronisering, utvidelsesbutikk og flere samtidige appvinduer er ikke levert.
 
-## Ikke inkludert
-
-Ny nettmotor, installasjonsprogram, signert offentlig Windows-release, automatiske appoppdateringer, passordbehandler, utvidelsesbutikk, skysynkronisering, ferdige fanegrupper og full støtte for flere vinduer.
-
-## Denne leveransen endrer
-
-GitHub-presentasjon, landingsside, bildepakke, dokumentasjon, opplasting og vedlikeholdsverktøy. Appkoden i `src/` er ikke endret.
+Den konkrete GUI-/nettmotortesten er et steg fremover fra tidligere kun kildekodekontroller, ikke dokumentasjon på at NOVA er best eller sikrest.

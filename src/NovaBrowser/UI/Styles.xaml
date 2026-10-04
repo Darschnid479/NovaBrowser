@@ -143,7 +143,7 @@
             <Grid>
                 <ToggleButton Focusable="False" IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
                     <ToggleButton.Template><ControlTemplate TargetType="ToggleButton"><Border CornerRadius="10" Background="{DynamicResource Field}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1">
-                        <ui:NovaIcon Kind="ChevronDown" Width="13" Height="13" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
+                        <ui:NovaIcon Kind="ChevronDown" Foreground="{DynamicResource Text}" Width="13" Height="13" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
                     </Border></ControlTemplate></ToggleButton.Template>
                 </ToggleButton>
                 <ContentPresenter Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" Margin="12,0,32,0" VerticalAlignment="Center" IsHitTestVisible="False" />
@@ -196,5 +196,17 @@
     <Style x:Key="SetupThemeChoice" TargetType="ListBoxItem" BasedOn="{StaticResource SetupChoice}">
         <Setter Property="Margin" Value="3" />
         <Setter Property="Padding" Value="10" />
+    </Style>
+    <Style x:Key="NovaMenuItem" TargetType="{x:Type MenuItem}">
+        <Setter Property="Foreground" Value="{DynamicResource Text}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="14,9" />
+        <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="{x:Type MenuItem}">
+            <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}"><ContentPresenter ContentSource="Header" RecognizesAccessKey="True" /></Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsHighlighted" Value="True"><Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource Field}" /><Setter Property="Foreground" Value="{DynamicResource Accent}" /></Trigger>
+                <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.45" /></Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate></Setter.Value></Setter>
     </Style>
 </ResourceDictionary>

@@ -26,9 +26,17 @@ Namespace NovaBrowser
                     Return ReadState(_statePath)
                 Catch ex As Exception When Recoverable(ex)
                     Try
-                        File.Copy(_statePath, _statePath & ".corrupt-" & Guid.NewGuid().ToString("N"), False)
+                        File.Copy(_statePath, _statePath & ".corrupt-" & DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") & "-" & Guid.NewGuid().ToString("N"), False)
                     Catch copyError As Exception When Recoverable(copyError)
                         ' Keep the existing primary untouched until a later save.
+                    End Try
+                    Try
+                        Dim copies = Directory.GetFiles(_folder, "state.json.corrupt-*")
+                        Array.Sort(copies, StringComparer.Ordinal)
+                        For index As Integer = 0 To copies.Length - 4
+                            File.Delete(copies(index))
+                        Next
+                    Catch cleanupError As Exception When Recoverable(cleanupError)
                     End Try
                     Try
                         Dim recovered = ReadState(_statePath & ".bak")

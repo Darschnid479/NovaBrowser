@@ -8,12 +8,18 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "NovaBrowser.Checks", "tests
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "NovaBrowser.UiChecks", "tests\NovaBrowser.UiChecks\NovaBrowser.UiChecks.vbproj", "{C07C0E33-509D-467A-96E5-C95F63A03182}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "NovaBrowser.ShellChecks", "tests\NovaBrowser.ShellChecks\NovaBrowser.ShellChecks.vbproj", "{0BCF4C76-63ED-452C-A4A5-9E467760DA91}"
+EndProject
 Global
     GlobalSection(SolutionConfigurationPlatforms) = preSolution
         Debug|Any CPU = Debug|Any CPU
         Release|Any CPU = Release|Any CPU
     EndGlobalSection
     GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0BCF4C76-63ED-452C-A4A5-9E467760DA91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BCF4C76-63ED-452C-A4A5-9E467760DA91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BCF4C76-63ED-452C-A4A5-9E467760DA91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BCF4C76-63ED-452C-A4A5-9E467760DA91}.Release|Any CPU.Build.0 = Release|Any CPU
         {C07C0E33-509D-467A-96E5-C95F63A03182}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
         {C07C0E33-509D-467A-96E5-C95F63A03182}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {C07C0E33-509D-467A-96E5-C95F63A03182}.Release|Any CPU.ActiveCfg = Release|Any CPU

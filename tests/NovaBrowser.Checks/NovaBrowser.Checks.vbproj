@@ -14,5 +14,7 @@
     <Compile Include="../../src/NovaBrowser/Services/ErrorDiagnostics.vb" Link="ErrorDiagnostics.vb" />
     <Compile Include="../../src/NovaBrowser/Services/SearchProviders.vb" Link="SearchProviders.vb" />
     <Compile Include="../../src/NovaBrowser/Models/SetupSession.vb" Link="SetupSession.vb" />
+    <Compile Include="../../src/NovaBrowser/Services/BrowserPolicies.vb" Link="BrowserPolicies.vb" />
+    <Compile Include="../../src/NovaBrowser/Services/ProfileRepository.vb" Link="ProfileRepository.vb" />
   </ItemGroup>
 </Project>

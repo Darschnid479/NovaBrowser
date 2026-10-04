@@ -77,7 +77,8 @@ Namespace NovaBrowser.Checks
                 Dim unknown As String = ErrorDiagnostics.FormatException(New FileLoadException("private load failure", "secret-document.pdf"))
                 Check("unknown module never exposed", Not unknown.Contains("secret-document", StringComparison.Ordinal))
                 CheckSetupFlow()
-                Console.WriteLine("PASS: " & _passed.ToString() & " checks. No websites visited and no browser profile modified.")
+                _passed += FeatureChecks.Run()
+                Console.WriteLine("PASS: " & _passed.ToString() & " checks. No external websites visited; only disposable test profiles used.")
                 Return 0
             Catch ex As Exception
                 Console.Error.WriteLine("FAIL after " & _passed.ToString() & " checks: " & ex.Message)

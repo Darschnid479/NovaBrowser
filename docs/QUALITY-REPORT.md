@@ -1,45 +1,29 @@
-# Kvalitetsrapport / GitHub Pro-pakke
+# NOVA 0.3.0 / valideringsrapport
 
-Dato: 2026-10-04. Appkilde: 0.2.0. Rapporten gjelder presentasjonspakken, ikke en godkjenning av nettleseren til produksjonsbruk.
+Dato: 2026-10-04. [GitHub Actions-kjøring](https://github.com/Darschnid479/NovaBrowser/actions/runs/37202764701). Inngangscommit: `4431a2e75625e5df085b5f80e7f7bbaab44e1bdb`. De materialiserte kildefilenes SHA-256 er i [evidence.json](validation/0.3.0/evidence.json); testkjøringen bruker samme materialiserte kilde som leveransen.
 
-## Faktisk utført i leveransens miljø
+## Faktisk utført på Windows
 
-| Kontroll | Resultat |
-| --- | --- |
-| Eksisterende `tools/check_source.py` | 182 kilde-/XAML-påstander bestått. Ingen Windows-kjøring inngår. |
-| `tools/check_package.py` | Bestått; lokale HTML-/README-ressurser, etiketter, PNG-format, hjelpefiler og grunnleggende pakkekrav. Antall avhenger av antall filer. |
-| `tools/test_site.py` | 103 Chromium/HTML-kontroller bestått. Bredder: 1440, 1024, 768, 390 og 320 piksler. |
-| JavaScript | `node --check` bestått for begge JS-filer. |
-| YAML | Alle 8 workflow-/saksmal-/Dependabot-filer kunne parses. Parsing er ikke en ekte Actions-kjøring. |
-| Appens kilde/assets | Alle 19 filer i `src/` er byte-for-byte identiske med den tidligere GitHub-Ready-pakken for 0.2.0. |
-| Bilder | Seks forskjellige, merkede UI-rekonstruksjoner rendret; ekte landingssidebilder tatt ved 1440 og 390 piksler bredde. |
-| Visuell kontroll | PC- og mobilutseende, oppstartsforhåndsvisning, bildeetiketter og sidedisposisjon kontrollert visuelt. |
-| ZIP | Kontrolleres ved pakking for lesbarhet, komplett innhold og fravær av byggemapper/profildata. |
+| Område | Resultat | Bevis |
+| --- | --- | --- |
+| Modell, URL-policy, søkeforslag og profillagring | 407 kontroller bestod | [Logg](validation/0.3.0/policy-tests.txt) |
+| WPF-ikoner og tekstlayout | 116 kontroller bestod | [Logg](validation/0.3.0/layout-tests.txt) |
+| Faktisk vindu og WebView2 | 56 kontroller bestod | [Logg](validation/0.3.0/shell-tests.txt) |
+| Full løsning | Kompilert; advarsler behandles som feil | [Byggelogg](validation/0.3.0/build.txt) |
+| Windows x64 | Selvstendig, usignert mappe publisert | [Publiseringslogg](validation/0.3.0/publish.txt) |
 
-Nettleserkontrollene sjekket blant annet fire temavalg, oppdatert bilde og tekst, ett aktivt temavalg, FAQ, lastede bilder, fravær av horisontal overflyt, redusert bevegelse, tastaturfokus, riktige fargepaletter og synlige bildemerkinger.
+Kontrolltallet inkluderer 256 kombinasjoner av åtte vilkår for fanepause. Dette er regresjonsbevis, ikke en full sikkerhetsrevisjon eller en garanti for alle nettsteder.
 
-Ressursene ble rendret fra lokale data i minnet. Det kjørte ingen NOVA/WebView2-økt, og denne kontrollen besøkte ingen eksterne nettsteder med NOVA.
+## Nettmotoren ble faktisk startet
 
-## Ikke kjørt eller ikke bekreftet
+Integrasjonstesten lastet to kontrollerte HTTP-sider fra en lokal server bundet til 127.0.0.1. Den kontrollerte tilbake/frem-grunnlaget, hjem-til-nettside-navigering, lydstatus, normal/privat localStorage-isolasjon, ny privat økt, oppvåkning etter suspendering, lukking under initialisering og ny motor etter en bevisst krasjtest. Bare motoren for en unik midlertidig testprofil ble avsluttet. Ingen brukerprofil eller offentlig nettside ble brukt.
 
-- Kompilering/kjøring av VB.NET/WPF-appen på Windows.
-- Eksisterende .NET modell-/adressekontroller og WPF UI-kontroller i denne sesjonen.
-- Faktisk kjøring av BAT, PowerShell-opplaster, PowerShell-integrasjonstester og Windows-skjermbildeverktøyet. De er kildekontrollert, men ikke runtime-verifisert her.
-- En ekte push, GitHub Actions-kjøring, Pages-deployment eller releaseopprettelse. Ingen repository-filer ble publisert som del av pakkearbeidet.
-- Retting av brukerens rapport om usynlige lukk-/maksimeringsknapper. Appkoden er uendret.
-- En uavhengig sikkerhetsrevisjon, full tilgjengelighetsrevisjon, DRM-/nettstedskompatibilitetstest eller ytelsessammenligning mot Chrome/Firefox.
+Suspendering er en best-effort-funksjon: testen sammenholder modellens tilstand med motorens faktiske tilstand og sjekker at aktivering gjenopptar siden. Dette beviser ikke en bestemt prosent minnebesparelse eller at alle sider kan suspenderes.
 
-## Gjenta kontroller
+## Ikke bekreftet av disse testene
 
-```text
-python tools/check_source.py
-python tools/check_package.py
-node --check docs/assets/site.js
-node --check docs/assets/preview.js
-```
+Manuell bruk av alle nedlastings-/PDF-/bokmerkedialoger, nettsteders før-lukking-varsler, skjermdeling og samtlige tillatelser, DRM/video, alle DPI-/flerskjermkombinasjoner, skjermlesere, langtidsstabilitet, installeroppførsel, kode-signering og sammenligninger med Chrome/Firefox. Bruk en etablert nettleser til kritiske oppgaver inntil relevante tester er gjennomført.
 
-Valgfri visuell test: installer Python-pakken Playwright og en støttet Chromium, og kjør `python tools/test_site.py`. `NOVA_CHROMIUM` kan settes til en eksisterende Chromium-sti. `python tools/render_previews.py` regenererer de merkede HTML-bildene og nettsideskjermbildene. Ingen av disse kjører Windows-appen.
+## Gjenskap
 
-Windows-workflowen er konfigurert til å kjøre modell-/UI-kontrollene og de lokale Git-integrasjonstestene. Først et faktisk vellykket kjøreresultat kan omtales som bestått.
-
-`SHA256SUMS.txt` gjelder byteinnholdet i den leverte kildepakken og utelater seg selv. Git kan normalisere linjeskift ved checkout; en slik Git-kopi trenger ikke ha de samme råhashene. Hashsummer er ikke digitale signaturer.
+Kjør `TEST-ALT.cmd` på Windows. Den rene testen av vinduet besøker ingen nettsider. Ved separat bekreftelse kjøres nettmotortesten mot loopback og med en egen testprofil. Kildekodens normalprofil påvirkes ikke. Rålogger og bildehashes er bevart i `docs/validation/0.3.0/`.

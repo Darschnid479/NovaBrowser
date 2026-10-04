@@ -38,6 +38,16 @@ Namespace NovaBrowser
                 If handle = IntPtr.Zero Then Return
                 Dim dark As Integer = If(_state.Settings.Theme = "Dawn" OrElse SystemParameters.HighContrast, 0, 1)
                 DwmSetWindowAttribute(handle, 20, dark, 4)
+                If Not SystemParameters.HighContrast Then
+                    Dim background = TryCast(Application.Current.Resources("Bg"), System.Windows.Media.SolidColorBrush)
+                    Dim foreground = TryCast(Application.Current.Resources("Text"), System.Windows.Media.SolidColorBrush)
+                    If background IsNot Nothing AndAlso foreground IsNot Nothing Then
+                        Dim bg = CInt(background.Color.R) Or (CInt(background.Color.G) << 8) Or (CInt(background.Color.B) << 16)
+                        Dim fg = CInt(foreground.Color.R) Or (CInt(foreground.Color.G) << 8) Or (CInt(foreground.Color.B) << 16)
+                        DwmSetWindowAttribute(handle, 35, bg, 4)
+                        DwmSetWindowAttribute(handle, 36, fg, 4)
+                    End If
+                End If
             Catch ex As Exception When TypeOf ex Is DllNotFoundException OrElse TypeOf ex Is EntryPointNotFoundException
                 ' Cosmetic API only; Windows always retains its real caption buttons.
             End Try
