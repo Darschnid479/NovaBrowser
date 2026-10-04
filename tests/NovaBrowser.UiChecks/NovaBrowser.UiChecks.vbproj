@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+    <RootNamespace></RootNamespace>
+    <AssemblyName>NOVA.UiChecks</AssemblyName>
+    <StartupObject>NovaBrowser.UiChecks.Program</StartupObject>
+    <MyType>Empty</MyType>
+    <OptionStrict>On</OptionStrict>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/NovaBrowser/UI/NovaIcon.vb" Link="NovaIcon.vb" />
+    <Compile Include="../../src/NovaBrowser/UI/ThemeManager.vb" Link="ThemeManager.vb" />
+    <Compile Include="../../src/NovaBrowser/Models/AppState.vb" Link="AppState.vb" />
+    <Compile Include="../../src/NovaBrowser/Services/UrlPolicy.vb" Link="UrlPolicy.vb" />
+    <Compile Include="../../src/NovaBrowser/Services/SearchProviders.vb" Link="SearchProviders.vb" />
+    <Page Include="../../src/NovaBrowser/UI/Styles.xaml" Link="UI/Styles.xaml" />
+  </ItemGroup>
+</Project>

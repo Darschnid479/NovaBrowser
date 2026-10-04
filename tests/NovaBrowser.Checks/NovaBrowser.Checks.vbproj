@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace></RootNamespace>
+    <StartupObject>NovaBrowser.Checks.Program</StartupObject>
+    <OptionStrict>On</OptionStrict>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionInfer>On</OptionInfer>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/NovaBrowser/Services/UrlPolicy.vb" Link="UrlPolicy.vb" />
+    <Compile Include="../../src/NovaBrowser/Models/AppState.vb" Link="AppState.vb" />
+    <Compile Include="../../src/NovaBrowser/Services/ErrorDiagnostics.vb" Link="ErrorDiagnostics.vb" />
+    <Compile Include="../../src/NovaBrowser/Services/SearchProviders.vb" Link="SearchProviders.vb" />
+    <Compile Include="../../src/NovaBrowser/Models/SetupSession.vb" Link="SetupSession.vb" />
+  </ItemGroup>
+</Project>

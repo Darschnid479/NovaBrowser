@@ -1,0 +1,345 @@
+--- before/src/NovaBrowser/MainWindow.Interactions.vb
++++ after/src/NovaBrowser/MainWindow.Interactions.vb
+@@ -467,11 +467,7 @@
+         Private Async Sub Retry_Click(sender As Object, e As RoutedEventArgs)
+             Dim browserTab = _active
+             If browserTab Is Nothing Then Return
+-            If browserTab.View IsNot Nothing Then
+-                BrowserHost.Children.Remove(browserTab.View)
+-                browserTab.View.Dispose()
+-                browserTab.View = Nothing
+-            End If
++            ReleaseTabView(browserTab)
+             browserTab.Initialization = Nothing
+             Await NavigateAsync(browserTab, browserTab.Address)
+         End Sub
+--- before/src/NovaBrowser/MainWindow.xaml.vb
++++ after/src/NovaBrowser/MainWindow.xaml.vb
+@@ -32,6 +32,7 @@
+         Private _settingsReady As Boolean
+         Private _isClosing As Boolean
+         Private _allowClose As Boolean
++        Private _fatalShutdown As Boolean
+         Private _sidebarVisible As Boolean = True
+         Private _drawerMode As String = "settings"
+         Private _confirmCompletion As TaskCompletionSource(Of Boolean)
+@@ -214,8 +215,7 @@
+                 options.IsInPrivateModeEnabled = browserTab.IsPrivate
+                 Await view.EnsureCoreWebView2Async(env, options)
+                 If browserTab.Closed OrElse _isClosing Then
+-                    view.Dispose()
+-                    BrowserHost.Children.Remove(view)
++                    ReleaseTabView(browserTab)
+                     Return False
+                 End If
+                 ConfigureWebView(browserTab)
+@@ -224,11 +224,7 @@
+                 Return True
+             Catch ex As Exception
+                 If _environment IsNot Nothing AndAlso _environment.IsFaulted Then _environment = Nothing
+-                If browserTab.View IsNot Nothing Then
+-                    BrowserHost.Children.Remove(browserTab.View)
+-                    browserTab.View.Dispose()
+-                    browserTab.View = Nothing
+-                End If
++                ReleaseTabView(browserTab)
+                 ReportTabError(browserTab, ex)
+                 Return False
+             End Try
+@@ -388,11 +384,7 @@
+             Dim index = _tabs.IndexOf(browserTab)
+             browserTab.Closed = True
+             browserTab.NavigationVersion += 1
+-            If browserTab.View IsNot Nothing Then
+-                BrowserHost.Children.Remove(browserTab.View)
+-                browserTab.View.Dispose()
+-                browserTab.View = Nothing
+-            End If
++            ReleaseTabView(browserTab)
+             For Each operation In _downloads.Where(Function(kv) kv.Value Is browserTab).Select(Function(kv) kv.Key).ToArray()
+                 _downloads.Remove(operation)
+             Next
+@@ -414,12 +406,13 @@
+         End Sub
+ 
+         Private Sub ScheduleSave()
+-            If _restoring OrElse _isClosing Then Return
++            If _restoring OrElse _isClosing OrElse _fatalShutdown Then Return
+             _saveTimer.Stop()
+             _saveTimer.Start()
+         End Sub
+ 
+         Private Sub PersistState()
++            If _fatalShutdown Then Return
+             Dim normal = _tabs.Where(Function(t) Not t.IsPrivate AndAlso (t.IsHome OrElse UrlPolicy.IsWebUrl(t.Address))).ToList()
+             _state.Session = If(_state.Settings.RestoreSession,
+                 normal.Select(Function(t) New SessionEntry With {.Title = t.Title, .Url = If(t.IsHome, UrlPolicy.HomeUrl, t.Address)}).ToList(), New List(Of SessionEntry)())
+@@ -437,7 +430,7 @@
+                 End If
+                 Return
+             End If
+-            PersistState()
++            If Not _fatalShutdown Then PersistState()
+             _isClosing = True
+             _clock.Stop()
+             _saveTimer.Stop()
+@@ -445,8 +438,37 @@
+             _confirmCompletion?.TrySetResult(False)
+             For Each browserTab In _tabs
+                 browserTab.Closed = True
+-                browserTab.View?.Dispose()
++                ReleaseTabView(browserTab)
+             Next
++        End Sub
++
++        Friend Sub PrepareForFatalShutdown()
++            ' Do not overwrite the saved session with partial crash-time state.
++            _fatalShutdown = True
++            _allowClose = True
++            _clock.Stop()
++            _saveTimer.Stop()
++            _toastTimer.Stop()
++            _confirmCompletion?.TrySetResult(False)
++        End Sub
++
++        Private Sub ReleaseTabView(browserTab As BrowserTab)
++            If browserTab Is Nothing Then Return
++            Dim view As WebView2CompositionControl = browserTab.View
++            browserTab.View = Nothing
++            If view Is Nothing Then Return
++            Try
++                BrowserHost.Children.Remove(view)
++            Catch ex As Exception
++                StateStore.LogError(ex)
++            End Try
++            Try
++                view.Dispose()
++            Catch ex As Exception
++                ' The composition control can also fail in Dispose after failed init.
++                ' Log it, but still allow the tab/window to close.
++                StateStore.LogError(ex)
++            End Try
+         End Sub
+ 
+         Private Sub Viewport_SizeChanged(sender As Object, e As SizeChangedEventArgs)
+--- before/src/NovaBrowser/NovaBrowser.vbproj
++++ after/src/NovaBrowser/NovaBrowser.vbproj
+@@ -1,7 +1,11 @@
+ <Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+     <OutputType>WinExe</OutputType>
+-    <TargetFramework>net10.0-windows</TargetFramework>
++    <!-- CompositionControl needs the WinRT projection, not just the WPF target. -->
++    <TargetFramework>net10.0-windows10.0.17763.0</TargetFramework>
++    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
++    <PublishTrimmed>false</PublishTrimmed>
++    <PublishSingleFile>false</PublishSingleFile>
+     <UseWPF>true</UseWPF>
+     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+     <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+@@ -13,7 +17,7 @@
+     <OptionInfer>On</OptionInfer>
+     <AssemblyName>NOVA</AssemblyName>
+     <Product>NOVA Browser</Product>
+-    <Version>0.1.0</Version>
++    <Version>0.1.2</Version>
+     <ApplicationManifest>app.manifest</ApplicationManifest>
+     <ApplicationIcon>Assets/Nova.ico</ApplicationIcon>
+     <DebugType>portable</DebugType>
+@@ -22,4 +26,20 @@
+   <ItemGroup>
+     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
+   </ItemGroup>
++  <!-- Fail the build instead of delivering a folder known to fail on first navigation. -->
++  <ItemGroup>
++    <NovaCompositionRuntimeFile Include="Microsoft.Windows.SDK.NET.dll;WinRT.Runtime.dll" />
++  </ItemGroup>
++  <Target Name="NovaVerifyBuildRuntime" AfterTargets="Build"
++          Condition="'$(DesignTimeBuild)' != 'true'">
++    <Error Code="NOVA001"
++           Condition="!Exists('$(TargetDir)%(NovaCompositionRuntimeFile.Identity)')"
++           Text="NOVA mangler %(NovaCompositionRuntimeFile.Identity) i byggemappen. Kontroller Windows-versjonen i TargetFramework, og kjoer dotnet restore --force-evaluate. Ikke last ned DLL-filer fra tilfeldige nettsteder." />
++  </Target>
++  <Target Name="NovaVerifyPublishRuntime" AfterTargets="Publish"
++          Condition="'$(DesignTimeBuild)' != 'true'">
++    <Error Code="NOVA002"
++           Condition="!Exists('$(PublishDir)%(NovaCompositionRuntimeFile.Identity)')"
++           Text="NOVA mangler %(NovaCompositionRuntimeFile.Identity) i EXE-mappen. Ikke distribuer en ufullstendig mappe. Kjoer BYGG-EXE.cmd igjen." />
++  </Target>
+ </Project>
+--- before/src/NovaBrowser/Program.vb
++++ after/src/NovaBrowser/Program.vb
+@@ -1,4 +1,6 @@
+ Imports System
++Imports System.IO
++Imports System.Reflection
+ Imports System.Threading
+ Imports System.Windows
+ 
+@@ -13,24 +15,54 @@
+                     Return
+                 End If
+                 Try
++                    ' Detect a missing WinRT projection before a WPF layout event throws.
++                    VerifyCompositionDependencies()
+                     Dim app As New Application With {.ShutdownMode = ShutdownMode.OnMainWindowClose}
++                    Dim handlingFatalError As Boolean = False
++                    AddHandler app.DispatcherUnhandledException,
++                        Sub(sender, e)
++                            e.Handled = True
++                            StateStore.LogError(e.Exception)
++                            ' A second error during cleanup must not open another dialog.
++                            If handlingFatalError Then Return
++                            handlingFatalError = True
++                            Dim main As MainWindow = TryCast(app.MainWindow, MainWindow)
++                            If main IsNot Nothing Then main.PrepareForFatalShutdown()
++                            MessageBox.Show("NOVA møtte en feil og må lukkes." & Environment.NewLine &
++                                "Feiltype: " & e.Exception.GetType().Name & Environment.NewLine &
++                                "Detaljer: " & Path.Combine(StateStore.DataFolder, "error.log") & Environment.NewLine &
++                                "Åpne loggen med AAPNE-FEILLOGG.cmd i prosjektmappen.",
++                                "NOVA 0.1.2", MessageBoxButton.OK, MessageBoxImage.Error)
++                            app.Shutdown(1)
++                        End Sub
+                     app.Resources.MergedDictionaries.Add(New ResourceDictionary With {
+                         .Source = New Uri("pack://application:,,,/UI/Styles.xaml", UriKind.Absolute)})
+-                    AddHandler app.DispatcherUnhandledException,
+-                        Sub(sender, e)
+-                            StateStore.LogError(e.Exception)
+-                            MessageBox.Show("NOVA møtte en feil og må lukkes. Detaljer er lagret i error.log i datamappen.", "NOVA")
+-                            e.Handled = True
+-                            app.Shutdown(1)
+-                        End Sub
+                     app.Run(New MainWindow())
+                 Catch ex As Exception
++                    Environment.ExitCode = 1
+                     StateStore.LogError(ex)
+-                    MessageBox.Show("NOVA kunne ikke starte. " & ex.Message, "NOVA", MessageBoxButton.OK, MessageBoxImage.Error)
++                    MessageBox.Show("NOVA kunne ikke starte. " & ex.Message & Environment.NewLine &
++                        "Detaljer: " & Path.Combine(StateStore.DataFolder, "error.log"),
++                        "NOVA 0.1.2", MessageBoxButton.OK, MessageBoxImage.Error)
+                 Finally
+                     instance.ReleaseMutex()
+                 End Try
+             End Using
+         End Sub
++
++        Private Sub VerifyCompositionDependencies()
++            For Each moduleName As String In New String() {"WinRT.Runtime", "Microsoft.Windows.SDK.NET"}
++                Try
++                    Assembly.Load(New AssemblyName(moduleName))
++                Catch ex As Exception When TypeOf ex Is FileNotFoundException OrElse
++                                           TypeOf ex Is FileLoadException OrElse
++                                           TypeOf ex Is BadImageFormatException
++                    Throw New InvalidOperationException(
++                        "NOVA kunne ikke laste programdelen " & moduleName & "." & Environment.NewLine &
++                        "Pakk ut hele den nye ZIP-filen i en ny mappe, og kjør START-NOVA.cmd." & Environment.NewLine &
++                        "Bruker du EXE-utgaven, må alle filene i win-x64-mappen ligge sammen.", ex)
++                End Try
++            Next
++        End Sub
+     End Module
+ End Namespace
+--- before/src/NovaBrowser/Services/ErrorDiagnostics.vb
++++ after/src/NovaBrowser/Services/ErrorDiagnostics.vb
+@@ -0,0 +1,69 @@
++Imports System
++Imports System.Globalization
++Imports System.IO
++Imports System.Runtime.InteropServices
++Imports System.Text
++
++Namespace NovaBrowser
++    ' Pure formatter: does not read browser state, write files, or visit websites.
++    Public NotInheritable Class ErrorDiagnostics
++        Private Sub New()
++        End Sub
++
++        Public Shared Function FormatException(ex As Exception) As String
++            If ex Is Nothing Then Throw New ArgumentNullException(NameOf(ex))
++            Dim report As New StringBuilder()
++            report.AppendLine(DateTimeOffset.Now.ToString("O", CultureInfo.InvariantCulture) & " NOVA 0.1.2 diagnostics v2")
++            report.AppendLine("Runtime: " & RuntimeInformation.FrameworkDescription)
++            report.AppendLine("OS: " & Environment.OSVersion.VersionString)
++            report.AppendLine("Architecture: " & RuntimeInformation.ProcessArchitecture.ToString())
++            Dim currentException As Exception = ex
++            Dim depth As Integer = 0
++            While currentException IsNot Nothing AndAlso depth < 8
++                report.AppendLine("Exception[" & depth.ToString(CultureInfo.InvariantCulture) & "]: " & currentException.GetType().FullName)
++                report.AppendLine("HResult: 0x" & currentException.HResult.ToString("X8", CultureInfo.InvariantCulture))
++                Dim rawName As String = Nothing
++                If TypeOf currentException Is FileNotFoundException Then
++                    rawName = DirectCast(currentException, FileNotFoundException).FileName
++                ElseIf TypeOf currentException Is FileLoadException Then
++                    rawName = DirectCast(currentException, FileLoadException).FileName
++                ElseIf TypeOf currentException Is BadImageFormatException Then
++                    rawName = DirectCast(currentException, BadImageFormatException).FileName
++                End If
++                If rawName IsNot Nothing Then report.AppendLine("Module: " & KnownModuleName(rawName))
++                ' Exception.Message / ToString / Data can contain URLs and private data.
++                ' Keep known library names and stack traces, not arbitrary messages.
++                report.AppendLine(If(currentException.StackTrace, "(no stack trace)"))
++                currentException = currentException.InnerException
++                depth += 1
++            End While
++            report.AppendLine()
++            Return report.ToString()
++        End Function
++
++        Public Shared Function KnownModuleName(rawName As String) As String
++            If String.IsNullOrWhiteSpace(rawName) Then Return "(not specified)"
++            If rawName.Length > 1024 OrElse rawName.Contains("://", StringComparison.Ordinal) Then Return "(name redacted)"
++            For Each character As Char In rawName
++                If Char.IsControl(character) Then Return "(name redacted)"
++            Next
++            Dim candidate As String = rawName.Trim().Replace("\"c, "/"c)
++            Dim slashIndex As Integer = candidate.LastIndexOf("/"c)
++            If slashIndex >= 0 Then candidate = candidate.Substring(slashIndex + 1)
++            Dim commaIndex As Integer = candidate.IndexOf(","c)
++            If commaIndex >= 0 Then candidate = candidate.Substring(0, commaIndex).Trim()
++            If candidate.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) Then
++                candidate = candidate.Substring(0, candidate.Length - 4)
++            End If
++            ' Allow only known dependency names; do not record document names or paths.
++            For Each knownName As String In New String() {
++                "Microsoft.Windows.SDK.NET", "WinRT.Runtime", "WebView2Loader",
++                "Microsoft.Web.WebView2.Core", "Microsoft.Web.WebView2.Wpf",
++                "Microsoft.Web.WebView2.WinForms", "PresentationCore",
++                "PresentationFramework", "WindowsBase", "System.Runtime"}
++                If String.Equals(candidate, knownName, StringComparison.OrdinalIgnoreCase) Then Return knownName
++            Next
++            Return "(name redacted)"
++        End Function
++    End Class
++End Namespace
+--- before/src/NovaBrowser/Services/StateStore.vb
++++ after/src/NovaBrowser/Services/StateStore.vb
+@@ -70,15 +70,20 @@
+         End Function
+ 
+         Public Shared Sub LogError(ex As Exception)
+-            Try
+-                Directory.CreateDirectory(DataFolder)
+-                Dim log = Path.Combine(DataFolder, "error.log")
+-                If File.Exists(log) AndAlso New FileInfo(log).Length > 512 * 1024 Then File.Delete(log)
+-                ' Avoid dumping URLs, page contents, cookies or private-tab titles to the log.
+-                File.AppendAllText(log, DateTimeOffset.Now.ToString("O") & " " & ex.GetType().FullName & Environment.NewLine & If(ex.StackTrace, "") & Environment.NewLine)
+-            Catch
+-                ' Error reporting must not make startup fail again.
+-            End Try
++            If ex Is Nothing Then Return
++            SyncLock Gate
++                Try
++                    Directory.CreateDirectory(DataFolder)
++                    Dim logPath As String = Path.Combine(DataFolder, "error.log")
++                    If File.Exists(logPath) AndAlso New FileInfo(logPath).Length > 512 * 1024 Then
++                        File.Move(logPath, Path.Combine(DataFolder, "error.previous.log"), True)
++                    End If
++                    File.AppendAllText(logPath, ErrorDiagnostics.FormatException(ex), New UTF8Encoding(False))
++                Catch
++                    ' Error reporting must never create a second failure.
++                End Try
++            End SyncLock
+         End Sub
++
+     End Class
+ End Namespace

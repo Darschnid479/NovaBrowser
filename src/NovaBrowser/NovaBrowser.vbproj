@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- CompositionControl needs the WinRT projection, not just the WPF target. -->
+    <TargetFramework>net10.0-windows10.0.17763.0</TargetFramework>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishSingleFile>false</PublishSingleFile>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+    <RootNamespace></RootNamespace>
+    <StartupObject>NovaBrowser.Program</StartupObject>
+    <MyType>Empty</MyType>
+    <OptionStrict>On</OptionStrict>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionInfer>On</OptionInfer>
+    <AssemblyName>NOVA</AssemblyName>
+    <Product>NOVA Browser</Product>
+    <Version>0.2.0</Version>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets/Nova.ico</ApplicationIcon>
+    <DebugType>portable</DebugType>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
+  </ItemGroup>
+  <!-- Fail the build instead of delivering a folder known to fail on first navigation. -->
+  <ItemGroup>
+    <NovaCompositionRuntimeFile Include="Microsoft.Windows.SDK.NET.dll;WinRT.Runtime.dll" />
+  </ItemGroup>
+  <Target Name="NovaVerifyBuildRuntime" AfterTargets="Build"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <Error Code="NOVA001"
+           Condition="!Exists('$(TargetDir)%(NovaCompositionRuntimeFile.Identity)')"
+           Text="NOVA mangler %(NovaCompositionRuntimeFile.Identity) i byggemappen. Kontroller Windows-versjonen i TargetFramework, og kjoer dotnet restore --force-evaluate. Ikke last ned DLL-filer fra tilfeldige nettsteder." />
+  </Target>
+  <Target Name="NovaVerifyPublishRuntime" AfterTargets="Publish"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <Error Code="NOVA002"
+           Condition="!Exists('$(PublishDir)%(NovaCompositionRuntimeFile.Identity)')"
+           Text="NOVA mangler %(NovaCompositionRuntimeFile.Identity) i EXE-mappen. Ikke distribuer en ufullstendig mappe. Kjoer BYGG-EXE.cmd igjen." />
+  </Target>
+</Project>

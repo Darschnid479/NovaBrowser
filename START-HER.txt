@@ -1,0 +1,71 @@
+NOVA 0.2.0 - IKONER, ADRESSEFELT OG OPPSTARTSVEIVISER
+===================================================
+
+TIL DAVID
+---------
+1. Lukk den gamle NOVA-utgaven.
+2. Pakk ut HELE denne ZIP-filen i en NY mappe.
+3. Dobbeltklikk START-NOVA.cmd i den nye mappen.
+4. Velg søkemotor, utseende og navn i veiviseren. Trykk Start NOVA.
+
+Ikke kopier gamle bin-, obj- eller out-mapper til denne utgaven.
+Ikke start en gammel NOVA.exe etter at du har pakket ut den nye koden.
+Du trenger ikke installere noen ikonfont.
+
+Veiviseren vises også én gang for eldre NOVA-profiler, fordi disse ikke
+har et lagret fullført oppsett. Neste gang starter nettleseren vanlig.
+Du kan åpne veiviseren igjen fra Innstillinger > Åpne oppstartsveiviseren.
+Den endrer ikke Windows' standardnettleser eller søkemotoren i andre apper.
+Bokmerker, historikk og WebView2-profil bruker samme datamappe som før.
+IKKE slett state.json eller WebView2-mappen for å få frem veiviseren.
+
+NYTT I 0.2.0
+------------
+- 28 tegnede ikontyper: ingen private Unicode-tegn eller MDL2-font.
+- Tekst i adressefeltet sentreres loddrett og beholder venstrestilt URL.
+- Dobbelt avstand rundt teksten i TextBox-malen er fjernet.
+- Google, DuckDuckGo og Bing i veiviseren, innstillinger og søkefeltene.
+- Fire temaer, seks aksentfarger, animasjonsvalg og personlig navn.
+- Veiviseren redigerer en kopi; Avbryt lagrer ikke prøvevalgene.
+- Uferdig førstegangsoppsett starter ikke gjenopprettede nettfaner.
+- WebView2-rettelsen fra 0.1.2 er beholdt.
+
+TESTER
+------
+TEST-NOVA.cmd kjører tester av adresser, søk, lagringsformat,
+veiviserens valg og feildiagnostikk, uten å bruke nettleserprofilen.
+TEST-UI.cmd kjører egne Windows/WPF-tester av tegnede ikoner og
+tekstfeltets layout. Det starter ikke WebView2 og besøker ingen nettsider.
+
+VIKTIG OM TESTSTATUS
+-------------------
+Kildekode, XML/XAML, referanser og pakkeinnhold er statisk kontrollert.
+Geometrien til ikonene er også tegnet med en separat SVG-renderer.
+Dette er IKKE en kjørt Windows-test av NOVA.
+Denne pakken er ikke kompilert eller startet her: miljøet mangler .NET SDK,
+og forsøket på å hente SDK ble blokkert av manglende DNS-oppslag.
+VB-testene og WPF-testene er lagt ved, men ikke kjørt her.
+Se docs/VERIFISERING.txt og docs/TESTPLAN.md.
+
+VED FEIL
+--------
+Programfeil: dobbeltklikk AAPNE-FEILLOGG.cmd. Nyeste oppføringer har
+teksten "NOVA 0.2.0 diagnostics v2". Kontroller innholdet før deling;
+kallstakker kan vise lokale brukernavn og kildekodestier.
+Byggefeil: kopier feilen fra kommandovinduet.
+Del ikke state.json eller WebView2-profilen som feillogg.
+
+KRAV OG EGEN EXE
+----------------
+Samme krav som 0.1.2: Windows, .NET 10 SDK og WebView2 Evergreen Runtime.
+Har disse fungert allerede, trenger du normalt ikke installere dem igjen.
+Første bygg trenger internett for å hente prosjektavhengigheter.
+
+Offisielle installasjonssider:
+https://dotnet.microsoft.com/download/dotnet/10.0
+https://developer.microsoft.com/microsoft-edge/webview2/
+
+BYGG-EXE.cmd bygger en mappe med NOVA.exe under out\win-x64.
+Behold hele mappen samlet. Det er ikke levert en ferdig kompilert EXE.
+Åpne NOVA.sln i Visual Studio med .NET 10-støtte for å redigere koden.
+Dette er fortsatt en utviklingsversjon, ikke en sikkerhetsrevidert nettleser.
