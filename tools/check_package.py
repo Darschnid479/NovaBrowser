@@ -64,7 +64,7 @@ def main() -> None:
     check('site motion preference','prefers-reduced-motion' in (ROOT/'docs/assets/site.css').read_text())
     for name in ['windows-build.yml','site-checks.yml','pages.yml','release.yml']:
         check('workflow present '+name,(ROOT/'.github/workflows'/name).exists())
-    check('original app version preserved','<Version>0.2.0</Version>' in (ROOT/'src/NovaBrowser/NovaBrowser.vbproj').read_text())
+    check('app version 0.3.0','<Version>0.3.0</Version>' in (ROOT/'src/NovaBrowser/NovaBrowser.vbproj').read_text())
     # Source archives must never contain font files or a browser user-data profile.
     for p in ROOT.rglob('*'):
         if not p.is_file() or any(part in ('.git','bin','obj','out','node_modules') for part in p.parts): continue

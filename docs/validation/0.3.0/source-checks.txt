@@ -1,0 +1,159 @@
+NOVA 0.3.0 STATIC SOURCE CHECKS - NOT A BUILD OR RUNTIME TEST
+PASS: XML parses: src\NovaBrowser\app.manifest
+PASS: XML parses: src\NovaBrowser\MainWindow.xaml
+PASS: XML parses: src\NovaBrowser\NovaBrowser.vbproj
+PASS: XML parses: src\NovaBrowser\UI\Styles.xaml
+PASS: XML parses: tests\NovaBrowser.Checks\NovaBrowser.Checks.vbproj
+PASS: XML parses: tests\NovaBrowser.ShellChecks\NovaBrowser.ShellChecks.vbproj
+PASS: XML parses: tests\NovaBrowser.UiChecks\NovaBrowser.UiChecks.vbproj
+PASS: SDK selection JSON parses
+PASS: Release version is 0.3.0
+PASS: Versioned Windows target retained
+PASS: Native close/min/max retained
+PASS: WPF enabled
+PASS: CopyLocalLockFileAssemblies retained
+PASS: PublishTrimmed retained
+PASS: PublishSingleFile retained
+PASS: Both WinRT runtime output guards retained
+PASS: All main-window control names are unique
+PASS: Handler declared: Window_Loaded
+PASS: Handler declared: Window_Closing
+PASS: Handler declared: Window_PreviewKeyDown
+PASS: Handler declared: Window_StateChanged
+PASS: Handler declared: FocusMode_Click
+PASS: Handler declared: Command_Click
+PASS: Handler declared: Settings_Click
+PASS: Handler declared: ToggleSidebar_Click
+PASS: Handler declared: Home_Click
+PASS: Handler declared: Bookmarks_Click
+PASS: Handler declared: History_Click
+PASS: Handler declared: Downloads_Click
+PASS: Handler declared: NewTab_Click
+PASS: Handler declared: NewPrivateTab_Click
+PASS: Handler declared: TabList_SelectionChanged
+PASS: Handler declared: TabList_PreviewMouseDown
+PASS: Handler declared: TabList_ContextMenu
+PASS: Handler declared: CloseTab_Click
+PASS: Handler declared: Back_Click
+PASS: Handler declared: Forward_Click
+PASS: Handler declared: Reload_Click
+PASS: Handler declared: Connection_Click
+PASS: Handler declared: AddressBox_KeyDown
+PASS: Handler declared: AddressBox_TextChanged
+PASS: Handler declared: AddressBox_GotKeyboardFocus
+PASS: Handler declared: BookmarkCurrent_Click
+PASS: Handler declared: Viewport_SizeChanged
+PASS: Handler declared: HomeSearchBox_KeyDown
+PASS: Handler declared: HomeSearch_Click
+PASS: Handler declared: Shortcut_Click
+PASS: Handler declared: Retry_Click
+PASS: Handler declared: ZoomReset_Click
+PASS: Handler declared: SuggestionList_Click
+PASS: Handler declared: SuggestionList_KeyDown
+PASS: Handler declared: DrawerBackdrop_Click
+PASS: Handler declared: CloseDrawer_Click
+PASS: Handler declared: DownloadPause_Click
+PASS: Handler declared: DownloadCancel_Click
+PASS: Handler declared: DownloadReveal_Click
+PASS: Handler declared: Preferences_Changed
+PASS: Handler declared: RestartSetup_Click
+PASS: Handler declared: ExportBookmarks_Click
+PASS: Handler declared: ImportBookmarks_Click
+PASS: Handler declared: ClearHistory_Click
+PASS: Handler declared: ClearSiteData_Click
+PASS: Handler declared: LibraryEntry_Click
+PASS: Handler declared: DeleteEntry_Click
+PASS: Handler declared: CommandBackdrop_Click
+PASS: Handler declared: CommandSearch_TextChanged
+PASS: Handler declared: CommandSearch_KeyDown
+PASS: Handler declared: CommandList_MouseUp
+PASS: Handler declared: CommandList_KeyDown
+PASS: Handler declared: SetupSearch_Changed
+PASS: Handler declared: SetupTheme_Changed
+PASS: Handler declared: SetupAppearance_Changed
+PASS: Handler declared: SetupPersonal_Changed
+PASS: Handler declared: SetupCancel_Click
+PASS: Handler declared: SetupBack_Click
+PASS: Handler declared: SetupNext_Click
+PASS: Handler declared: ConfirmNo_Click
+PASS: Handler declared: ConfirmYes_Click
+PASS: Required named control exists: ReloadIcon
+PASS: Required named control exists: ConnectionIcon
+PASS: Required named control exists: BookmarkIcon
+PASS: Required named control exists: FocusModeButton
+PASS: Required named control exists: HomeSearchHint
+PASS: Required named control exists: SetupLayer
+PASS: Required named control exists: SetupNextButton
+PASS: No MDL2 dependency in current source
+PASS: No private-use icon characters
+PASS: No private-use numeric icon entities
+PASS: Old font Glyph property removed
+PASS: All 32 vector kinds are present
+PASS: Vector reference exists: Settings
+PASS: Vector reference exists: Menu
+PASS: Vector reference exists: Home
+PASS: Vector reference exists: Search
+PASS: Vector reference exists: Star
+PASS: Vector reference exists: History
+PASS: Vector reference exists: Download
+PASS: Vector reference exists: Close
+PASS: Vector reference exists: Back
+PASS: Vector reference exists: Forward
+PASS: Vector reference exists: Refresh
+PASS: Vector reference exists: Globe
+PASS: Vector reference exists: Plus
+PASS: Vector reference exists: More
+PASS: Vector reference exists: Trash
+PASS: Vector reference exists: Check
+PASS: Vector reference exists: ChevronDown
+PASS: Icon geometry is frozen before sharing
+PASS: No duplicate text padding via margin
+PASS: Text host binds vertical alignment
+PASS: Address uses dedicated input style
+PASS: Address Padding
+PASS: Address TextAlignment
+PASS: Address VerticalContentAlignment
+PASS: Address TextWrapping
+PASS: Home input also uses corrected style
+PASS: Missing completion marker defaults to False
+PASS: Wizard uses a copied draft
+PASS: First-run search requires selection
+PASS: Incomplete wizard cannot complete
+PASS: No session persistence before session init
+PASS: Startup branches on setup marker
+PASS: Complete setup saves before restoring session
+PASS: Save failure restores previous settings
+PASS: Wizard cancel does not save preview
+PASS: Search provider catalogue reused by resolver
+PASS: Search provider catalogue reused by settings
+PASS: Search provider catalogue reused by wizard
+PASS: No old untyped tab loops
+PASS: No old key inference collision
+PASS: Linked source exists: ../../src/NovaBrowser/Services/UrlPolicy.vb
+PASS: Linked source exists: ../../src/NovaBrowser/Models/AppState.vb
+PASS: Linked source exists: ../../src/NovaBrowser/Services/ErrorDiagnostics.vb
+PASS: Linked source exists: ../../src/NovaBrowser/Services/SearchProviders.vb
+PASS: Linked source exists: ../../src/NovaBrowser/Models/SetupSession.vb
+PASS: Linked source exists: ../../src/NovaBrowser/Services/BrowserPolicies.vb
+PASS: Linked source exists: ../../src/NovaBrowser/Services/ProfileRepository.vb
+PASS: Linked source exists: ../../src/NovaBrowser/UI/NovaIcon.vb
+PASS: Linked source exists: ../../src/NovaBrowser/UI/ThemeManager.vb
+PASS: Linked source exists: ../../src/NovaBrowser/UI/Styles.xaml
+PASS: Solution project exists: src\NovaBrowser\NovaBrowser.vbproj
+PASS: Solution project exists: tests\NovaBrowser.Checks\NovaBrowser.Checks.vbproj
+PASS: Solution project exists: tests\NovaBrowser.UiChecks\NovaBrowser.UiChecks.vbproj
+PASS: Solution project exists: tests\NovaBrowser.ShellChecks\NovaBrowser.ShellChecks.vbproj
+PASS: ASCII launch script: AAPNE-FEILLOGG.cmd
+PASS: CRLF launch script: AAPNE-FEILLOGG.cmd
+PASS: ASCII launch script: BYGG-EXE.cmd
+PASS: CRLF launch script: BYGG-EXE.cmd
+PASS: ASCII launch script: START-NOVA.cmd
+PASS: CRLF launch script: START-NOVA.cmd
+PASS: ASCII launch script: TEST-NOVA.cmd
+PASS: CRLF launch script: TEST-NOVA.cmd
+PASS: ASCII launch script: TEST-UI.cmd
+PASS: CRLF launch script: TEST-UI.cmd
+PASS: No font, compiled, or user-log files shipped
+PASS: No browser profile data shipped
+PASS: 198 source assertions; 105 unique controls; 61 handlers.
+NOT RUN by this tool: VB compilation, WPF execution, navigation, or privacy/security tests.

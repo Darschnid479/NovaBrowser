@@ -1,9 +1,9 @@
 name: Build NOVA on Windows
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
@@ -13,9 +13,9 @@ env:
   PYTHONUTF8: '1'
   DOTNET_NOLOGO: '1'
 jobs:
-  windows:
+  build:
     runs-on: windows-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
@@ -23,24 +23,60 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
-      - name: Source assertions
-        run: python tools/check_source.py
-      - name: Package and local link checks
-        run: python tools/check_package.py
-      - name: Upload integration tests against disposable LOCAL remotes
+      - name: Static source and package integrity
+        run: |
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          python tools/check_source.py 2>&1 | Tee-Object artifacts/source-checks.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/check_package.py 2>&1 | Tee-Object artifacts/package-checks.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload script integration with LOCAL disposable remotes only
         shell: powershell
-        run: .\tests\Upload.Tests.ps1
-      - name: URL policy and state model
-        run: dotnet run --project tests/NovaBrowser.Checks/NovaBrowser.Checks.vbproj -c Release
-      - name: WPF icon and text layout checks
-        run: dotnet run --project tests/NovaBrowser.UiChecks/NovaBrowser.UiChecks.vbproj -c Release
-      - name: Build WPF and VB.NET
-        run: dotnet build NOVA.sln -c Release
-      - name: Publish Windows x64 test folder
-        run: dotnet publish src/NovaBrowser/NovaBrowser.vbproj -c Release -r win-x64 --self-contained true -o out/win-x64 -p:PublishSingleFile=false
+        run: |
+          .\tests\Upload.Tests.ps1 2>&1 | Tee-Object artifacts/upload-tests.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Pure VB policy and persistence regression tests
+        run: |
+          dotnet run --project tests/NovaBrowser.Checks/NovaBrowser.Checks.vbproj -c Release 2>&1 | Tee-Object artifacts/policy-tests.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: WPF vector and text layout checks
+        run: |
+          dotnet run --project tests/NovaBrowser.UiChecks/NovaBrowser.UiChecks.vbproj -c Release 2>&1 | Tee-Object artifacts/layout-tests.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Compile complete solution with warnings treated as errors
+        run: |
+          dotnet build NOVA.sln -c Release 2>&1 | Tee-Object artifacts/build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Real WPF and WebView2 integration in a disposable profile
+        timeout-minutes: 8
+        run: |
+          dotnet run --project tests/NovaBrowser.ShellChecks/NovaBrowser.ShellChecks.vbproj -c Release --no-build -- artifacts/wpf --live 2>&1 | Tee-Object artifacts/shell-tests.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Publish unsigned self-contained win-x64 candidate
+        run: |
+          dotnet publish src/NovaBrowser/NovaBrowser.vbproj -c Release -r win-x64 --self-contained true -o out/win-x64 -p:PublishSingleFile=false 2>&1 | Tee-Object artifacts/publish.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($name in @('Microsoft.Windows.SDK.NET.dll','WinRT.Runtime.dll','NOVA.exe')) {
+            if (-not (Test-Path (Join-Path out/win-x64 $name))) { throw "Missing runtime file: $name" }
+          }
+          Copy-Item docs/RELEASE-NOTES.md out/win-x64/RELEASE-NOTES.md
+          Copy-Item LICENSE out/win-x64/LICENSE.txt
+          $root = (Resolve-Path out/win-x64).Path
+          $hashes = Get-ChildItem $root -File -Recurse | Sort-Object FullName | ForEach-Object {
+            (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() + '  ' + [IO.Path]::GetRelativePath($root,$_.FullName).Replace('\','/')
+          }
+          $hashes | Set-Content out/win-x64/SHA256SUMS.txt -Encoding utf8NoBOM
       - uses: actions/upload-artifact@v7
+        if: success()
         with:
-          name: NOVA-win-x64-unsigned-test-build
+          name: NOVA-windows-x64
           path: out/win-x64/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: NOVA-validation-evidence
+          path: artifacts/
           if-no-files-found: error
           retention-days: 14

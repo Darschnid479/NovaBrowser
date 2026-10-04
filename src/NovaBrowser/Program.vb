@@ -32,7 +32,7 @@ Namespace NovaBrowser
                                 "Feiltype: " & e.Exception.GetType().Name & Environment.NewLine &
                                 "Detaljer: " & Path.Combine(StateStore.DataFolder, "error.log") & Environment.NewLine &
                                 "Åpne loggen med AAPNE-FEILLOGG.cmd i prosjektmappen.",
-                                "NOVA 0.2.0", MessageBoxButton.OK, MessageBoxImage.Error)
+                                "NOVA 0.3.0", MessageBoxButton.OK, MessageBoxImage.Error)
                             app.Shutdown(1)
                         End Sub
                     app.Resources.MergedDictionaries.Add(New ResourceDictionary With {
@@ -43,7 +43,7 @@ Namespace NovaBrowser
                     StateStore.LogError(ex)
                     MessageBox.Show("NOVA kunne ikke starte. " & ex.Message & Environment.NewLine &
                         "Detaljer: " & Path.Combine(StateStore.DataFolder, "error.log"),
-                        "NOVA 0.2.0", MessageBoxButton.OK, MessageBoxImage.Error)
+                        "NOVA 0.3.0", MessageBoxButton.OK, MessageBoxImage.Error)
                 Finally
                     instance.ReleaseMutex()
                 End Try

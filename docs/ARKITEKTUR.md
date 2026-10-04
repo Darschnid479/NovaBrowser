@@ -1,3 +1,17 @@
+# Arkitektur / 0.3.0
+
+MainWindow er delt i egne partial-klasser for vindu, faner, lokale forslag, nedlastinger, veiviser og nettstedsforespørsler. BrowserPolicies og ProfileRepository har ingen WPF-avhengighet og testes separat. UI er XAML og egen vektortegning; ingen ikonfont er nødvendig.
+
+Vindusrammen eies av Windows. WPF eier startside/paneler, mens WebView2CompositionControl viser nettsiden. Hver fane har egen visning; visninger opprettes ved aktivering og avhendiges når fanen lukkes. Asynkrone oppstarter og motorhendelser kontrollerer fortsatt fane-/visningsidentitet før de endrer UI.
+
+Nettleserprofiler og nedlastinger er ikke UI-data som kan sendes via vilkårlige websidemeldinger. Host objects og web messaging er deaktivert. Innvilgede tillatelser er knyttet til dokumentkontekst. Dette er defensive valg, ikke en sikkerhetssertifisering.
+
+Profildata skrives med atomisk utskifting. Normal og privat kontekst skilles i øktlagring og lokale forslag. Ekstern runtime vedlikeholdes separat fra NOVA-appens kildekode.
+
+## Historiske implementasjonsnotater fra tidligere versjoner
+
+Notatene nedenfor kan omtale den tidligere egendefinerte vindusrammen og 0.2.0-teststatusen. Ved motstrid gjelder 0.3.0-koden og QUALITY-REPORT.
+
 # Tillegg: arkitektur i 0.2.0
 
 NovaIcon tegner frosne geometrier uten tekst. MainWindow.Setup eier veiviserens

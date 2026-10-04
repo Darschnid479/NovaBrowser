@@ -1,25 +1,21 @@
-# Veikart
+# Veikart med kvalitetskrav
 
-**Retning:** et personlig og pålitelig alternativ som brukere har en konkret grunn til å velge fremfor Chrome og Firefox. Punktene nedenfor er planlagte områder, ikke leverte funksjoner eller lovede datoer.
+## 0.3 / levert utviklingsgrunnlag
 
-## 1. Før flere funksjoner: pålitelig betjening
+Native vindusbetjening, lokale adresseforslag, festing/lyd/pausing av faner, nedlastingspanel, fokusmodus, bokmerkeutveksling og robust øktlagring. Automatiske Windows- og nettmotortester følger med. Se QUALITY-REPORT for bevis og avgrensninger.
 
-- Verifiser synlige lukk-, minimer- og maksimeringsknapper ved 100, 125, 150 og 200 prosent skalering.
-- Test adressefeltets tekst, tastaturfokus, klipp/lim og lang URL.
-- Test nye profiler, eksisterende 0.1.x-/0.2.0-profiler og avbrutt veiviser uten datatap.
-- Test oppstart, lukking, feil ved nettsidelasting og gjenoppretting av vanlige faner.
-- Bekreft at private faner ikke tas med i NOVAs historikk eller øktsgjenoppretting.
+## Neste milepæl / stabilitet til daglig bruk
 
-**Krav før neste offentlig testpakke:** grønt Windows-bygg, beståtte modell- og UI-kontroller, manuell rapport fra en faktisk Windows-PC og ekte appbilder. En grønn kildekontroll alene er ikke nok.
+Akseptansekrav: dokumenterte tester på minst to Windows-maskiner med ulik skalering; korrekt fokus og tastaturflyt; nedlasting, pause/fortsett/avbrudd og lagringsdialoger; skjemaer med ulagret arbeid; bokmerke-/PDF-dialoger; lyd/video og konto-pålogging på et representativt nettstedsett. Feil skal ha reproduksjonstrinn og regresjonstester.
 
-## 2. En bedre arbeidsflate
+## Distribusjon og vedlikehold
 
-Fanesøk, flytting av faner, fanegrupper, bedre nedlastingsoversikt, flere vinduer og mer konsekvent tastatur-/skjermleserstøtte. Brukertesting før nye funksjoner omtales som en forbedring.
+Før stabil release: velg og finansier kode-signering, installer og avinstaller uten å miste brukerdata utilsiktet, kontrollert oppdateringsflyt med tilbakeføring, avhengighetskontroll og tydelig sikkerhetskontakt. Ikke skjul en usignert utviklingspakke bak et «stable»-merke.
 
-## 3. Tillit og distribusjon
+## Differensiering
 
-Installeringsflyt, signering, dokumentert oppdateringsmodell og sikkerhetsgjennomgang av tillatelser, navigasjon, lagring og nedlastinger. Ikke bygg en egen passordbehandler uten en gjennomarbeidet sikkerhetsmodell.
+Vurder fanegrupper/arbeidsområder, flere vinduer og import fra andre nettlesere etter at grunnlaget er stabilt. Ytelse skal måles med fast maskinvare, nettstedssett, minne/CPU og flere målinger. Ingen konkurranserangering før reproduserbare målinger finnes.
 
-## 4. Mål før påstander
+## Langsiktig
 
-Mål kald/varm oppstart, minne med 1/10/30 faner, bakgrunnsbruk og respons på samme maskin, samme sider og kjente programversjoner. Publiser metode, rådata, gjentakelser og usikkerhet. Ingen "raskere enn Chrome"-merke før sammenligningen faktisk støtter det.
+Synkronisering, passordlagring, utvidelser og plattformutvidelser krever egne design- og sikkerhetsbeslutninger. Ingen leveringsdato eller funksjon er lovet her.

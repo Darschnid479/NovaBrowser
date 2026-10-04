@@ -5,7 +5,7 @@ where dotnet >nul 2>nul
 if errorlevel 1 goto missing
 call dotnet --list-sdks | findstr /r /b "10\." >nul
 if errorlevel 1 goto missing
-echo NOVA 0.2.0 - ikoner, adressefelt og oppstartsveiviser
+echo NOVA 0.3.0 - faner, fokus og robust lagring
 echo [1/3] Kjoerer kodekontroller ...
 call dotnet run --project "tests\NovaBrowser.Checks\NovaBrowser.Checks.vbproj" --configuration Release
 if errorlevel 1 goto failed

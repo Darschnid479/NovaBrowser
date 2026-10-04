@@ -1,4 +1,4 @@
-NOVA 0.2.0 - IKONER, ADRESSEFELT OG OPPSTARTSVEIVISER
+NOVA 0.3.0 - IKONER, ADRESSEFELT OG OPPSTARTSVEIVISER
 ===================================================
 
 TIL DAVID
@@ -19,7 +19,7 @@ Den endrer ikke Windows' standardnettleser eller søkemotoren i andre apper.
 Bokmerker, historikk og WebView2-profil bruker samme datamappe som før.
 IKKE slett state.json eller WebView2-mappen for å få frem veiviseren.
 
-NYTT I 0.2.0
+NYTT I 0.3.0
 ------------
 - 28 tegnede ikontyper: ingen private Unicode-tegn eller MDL2-font.
 - Tekst i adressefeltet sentreres loddrett og beholder venstrestilt URL.
@@ -50,7 +50,7 @@ Se docs/VERIFISERING.txt og docs/TESTPLAN.md.
 VED FEIL
 --------
 Programfeil: dobbeltklikk AAPNE-FEILLOGG.cmd. Nyeste oppføringer har
-teksten "NOVA 0.2.0 diagnostics v2". Kontroller innholdet før deling;
+teksten "NOVA 0.3.0 diagnostics v2". Kontroller innholdet før deling;
 kallstakker kan vise lokale brukernavn og kildekodestier.
 Byggefeil: kopier feilen fra kommandovinduet.
 Del ikke state.json eller WebView2-profilen som feillogg.

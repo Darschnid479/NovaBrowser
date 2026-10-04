@@ -13,7 +13,7 @@ Namespace NovaBrowser
         Public Shared Function FormatException(ex As Exception) As String
             If ex Is Nothing Then Throw New ArgumentNullException(NameOf(ex))
             Dim report As New StringBuilder()
-            report.AppendLine(DateTimeOffset.Now.ToString("O", CultureInfo.InvariantCulture) & " NOVA 0.2.0 diagnostics v2")
+            report.AppendLine(DateTimeOffset.Now.ToString("O", CultureInfo.InvariantCulture) & " NOVA 0.3.0 diagnostics v2")
             report.AppendLine("Runtime: " & RuntimeInformation.FrameworkDescription)
             report.AppendLine("OS: " & Environment.OSVersion.VersionString)
             report.AppendLine("Architecture: " & RuntimeInformation.ProcessArchitecture.ToString())

@@ -37,6 +37,7 @@ function Copy-NovaPackage {
                 if ($skipDirs -notcontains $item.Name) { $pending.Push($item.FullName) }
                 continue
             }
+            if ($item.Name -match '^state\.json($|\.)') { continue }
             if ($skipFiles -contains $item.Name -or $item.Extension -match '^\.(log|tmp|pdb|dll|exe|user|suo|zip|7z)$') { continue }
             if ($item.Name -match '^(\.env($|\.)|id_(rsa|ed25519|ecdsa)$|credentials\.json$|secrets\.json$)' -and $item.Name -ne '.env.example') {
                 throw "Mulig privat fil stoppet: $($item.Name). Flytt den ut av pakken og prov igjen."

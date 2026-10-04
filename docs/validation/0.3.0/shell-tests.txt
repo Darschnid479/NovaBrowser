@@ -1,0 +1,61 @@
+PASS: native window frame
+PASS: custom chrome no longer hides caption controls
+PASS: real min/max/close styles present
+PASS: window can resize
+PASS: native maximize works
+PASS: initial home tab
+PASS: home does not start network engine
+PASS: dirty-exit marker written during session
+PASS: pin moves tab to first position
+PASS: mute stored before engine initialization
+PASS: duplicate inherits mute
+PASS: pinned close requires confirmation
+PASS: cancel preserves pinned tab
+PASS: focus hides rail
+PASS: focus is reversible
+PASS: download drawer opens
+PASS: downloads do not turn home into about blank
+PASS: profile save succeeds
+PASS: private URL never serialized
+PASS: pins persisted
+PASS: local bookmark suggestions populated
+PASS: settings arrow contrast
+PASS: wizard fits small screen
+PASS: wizard next button stays visible
+PASS: sidebar auto-collapses on small screens
+PASS: address remains usable on small screens
+PASS: sidebar can be opened on compact desktops
+PASS: live tests use isolated profile
+PASS: engine initialized for fixture
+WebView2 runtime: 153.0.4234.48
+PASS: host objects disabled
+PASS: web messages disabled
+PASS: password autosave disabled
+PASS: engine initialized for fixture
+PASS: native back history available
+PASS: back updates visible address
+PASS: home keeps local NOVA address
+PASS: back from home returns to page
+PASS: mute reaches live engine
+PASS: unmute reaches live engine
+PASS: engine initialized for fixture
+PASS: private engine mode enabled
+PASS: private page cannot read normal storage
+PASS: normal storage unaffected by private page
+PASS: engine initialized for fixture
+PASS: new private session starts empty
+PASS: suspend state agrees with engine
+Hidden test page suspended: True
+PASS: activated page resumed
+PASS: page storage survives suspension
+PASS: closing during initialization releases view
+PASS: engine initialized for fixture
+PASS: engine crash keeps window and tab metadata
+PASS: retry creates working engine after crash
+PASS: normal storage retained after engine restart
+PASS: application still usable after restart
+PASS: real WebView2 smoke test; HTTP fixture bound only to 127.0.0.1, no public websites visited.
+PASS: normal exit recorded
+PASS: all web views released on close
+PASS: 56 real WPF/engine checks. Only disposable profiles and loopback test pages were used.
+Client renders are RenderTargetBitmap images. Files ending -window.png are native PrintWindow captures, not mockups.
