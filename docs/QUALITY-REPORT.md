@@ -1,6 +1,8 @@
 # NOVA 0.3.0 / valideringsrapport
 
-Dato: 2026-10-04. [GitHub Actions-kjøring](https://github.com/Darschnid479/NovaBrowser/actions/runs/37202764701). Inngangscommit: `4431a2e75625e5df085b5f80e7f7bbaab44e1bdb`. De materialiserte kildefilenes SHA-256 er i [evidence.json](validation/0.3.0/evidence.json); testkjøringen bruker samme materialiserte kilde som leveransen.
+> **Revalideringsmerknad:** En senere PR-kjøring viste at en nylig skrevet nettsideverdi kunne gå tapt ved tvungen avslutning av hele testmotorens prosesstre. Gjenoppretting av motor/vindu er derfor ikke en garanti for at nettstedets siste skrivinger overlever. Testen er presisert, og den opprinnelige observasjonen er bevart. [Detaljer og testavgrensning](validation/0.3.0/REVALIDATION.md). Tabellen nedenfor dokumenterer den opprinnelige kjøringen; den oppdaterte testen har 57 vindus-/nettmotorkontroller. Se PR #4 for siste kjøring.
+
+Dato: 2026-10-04. [GitHub Actions-kjøring](https://github.com/Darschnid479/NovaBrowser/actions/runs/37202764701). Inngangscommit: `4431a2e75625e5df085b5f80e7f7bbaab44e1bdb`. De materialiserte kildefilenes SHA-256 er i [evidence.json](validation/0.3.0/evidence.json); appkoden som ble testet er den samme som i leveransen. Integrasjonstestens senere presisering er beskrevet over.
 
 ## Faktisk utført på Windows
 
@@ -8,7 +10,7 @@ Dato: 2026-10-04. [GitHub Actions-kjøring](https://github.com/Darschnid479/Nova
 | --- | --- | --- |
 | Modell, URL-policy, søkeforslag og profillagring | 407 kontroller bestod | [Logg](validation/0.3.0/policy-tests.txt) |
 | WPF-ikoner og tekstlayout | 116 kontroller bestod | [Logg](validation/0.3.0/layout-tests.txt) |
-| Faktisk vindu og WebView2 | 56 kontroller bestod | [Logg](validation/0.3.0/shell-tests.txt) |
+| Faktisk vindu og WebView2 | 56 kontroller bestod i denne opprinnelige kjøringen | [Logg](validation/0.3.0/shell-tests.txt) |
 | Full løsning | Kompilert; advarsler behandles som feil | [Byggelogg](validation/0.3.0/build.txt) |
 | Windows x64 | Selvstendig, usignert mappe publisert | [Publiseringslogg](validation/0.3.0/publish.txt) |
 
@@ -22,7 +24,7 @@ Suspendering er en best-effort-funksjon: testen sammenholder modellens tilstand 
 
 ## Ikke bekreftet av disse testene
 
-Manuell bruk av alle nedlastings-/PDF-/bokmerkedialoger, nettsteders før-lukking-varsler, skjermdeling og samtlige tillatelser, DRM/video, alle DPI-/flerskjermkombinasjoner, skjermlesere, langtidsstabilitet, installeroppførsel, kode-signering og sammenligninger med Chrome/Firefox. Bruk en etablert nettleser til kritiske oppgaver inntil relevante tester er gjennomført.
+Manuell bruk av alle nedlastings-/PDF-/bokmerkedialoger, nettsteders før-lukking-varsler, skjermdeling og samtlige tillatelser, DRM/video, alle DPI-/flerskjermkombinasjoner, skjermlesere, langtidsstabilitet, installeroppførsel, kode-signering og sammenligninger med Chrome/Firefox. Nytt nettstedslager er ikke garantert bevart ved tvungen prosessavslutning. Bruk en etablert nettleser til kritiske oppgaver inntil relevante tester er gjennomført.
 
 ## Gjenskap
 
