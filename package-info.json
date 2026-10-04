@@ -1,0 +1,12 @@
+{
+  "package": "NOVA GitHub Pro",
+  "packageDate": "2026-10-04",
+  "appVersion": "0.2.0",
+  "appSourceChanged": false,
+  "repository": "Darschnid479/NovaBrowser",
+  "visuals": {
+    "appImages": "labelled HTML reconstructions, not live Windows screenshots",
+    "websiteImages": "local Chromium HTML screenshots"
+  },
+  "windowsExecutionVerified": false
+}

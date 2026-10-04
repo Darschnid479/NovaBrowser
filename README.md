@@ -1,237 +1,135 @@
 <div align="center">
 
+<img src="docs/assets/brand/social-card.png" alt="NOVA Browser. Internett. På din måte. Utviklingsversjon 0.2.0." width="100%">
+
 # NOVA Browser
 
-### **Internet, on your terms.**
+**En personlig Windows-nettleser. Et tydelig eget uttrykk.**
 
-A modern Windows browser experiment built with **Visual Basic .NET**, **WPF**, and **Microsoft WebView2**.
+[![Windows build](https://github.com/Darschnid479/NovaBrowser/actions/workflows/windows-build.yml/badge.svg)](https://github.com/Darschnid479/NovaBrowser/actions/workflows/windows-build.yml)
+[![Site checks](https://github.com/Darschnid479/NovaBrowser/actions/workflows/site-checks.yml/badge.svg)](https://github.com/Darschnid479/NovaBrowser/actions/workflows/site-checks.yml)
+![Status](https://img.shields.io/badge/status-utviklingsversjon-b1a1ff?style=flat-square)
+![Visual Basic](https://img.shields.io/badge/app-Visual_Basic_.NET-8797d8?style=flat-square)
+[![MIT](https://img.shields.io/badge/lisens-MIT-83e3b8?style=flat-square)](LICENSE)
 
-[![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D4?logo=windows11&logoColor=white)](https://www.microsoft.com/windows)
-[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![Visual Basic](https://img.shields.io/badge/Visual%20Basic-.NET-512BD4)](https://learn.microsoft.com/dotnet/visual-basic/)
-[![WebView2](https://img.shields.io/badge/Engine-WebView2-0B57D0?logo=microsoftedge&logoColor=white)](https://developer.microsoft.com/microsoft-edge/webview2/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Build](https://github.com/Darschnid479/NovaBrowser/actions/workflows/windows-build.yml/badge.svg)](https://github.com/Darschnid479/NovaBrowser/actions/workflows/windows-build.yml)
-
-**NOVA is focused on a polished, personal, highly customizable browsing experience.**
-
-[Features](#-features) · [Quick start](#-quick-start) · [Roadmap](#-roadmap) · [Architecture](#-architecture) · [Contributing](#-contributing)
+[Opplevelsen](#opplevelsen) &nbsp; / &nbsp; [Bilder](#bilder) &nbsp; / &nbsp; [Kom i gang](#kom-i-gang) &nbsp; / &nbsp; [Veikart](docs/ROADMAP.md) &nbsp; / &nbsp; [Bidra](CONTRIBUTING.md)
 
 </div>
 
----
+> **Status: 0.2.0 / utviklingsversjon.** Appen er et VB.NET/WPF-grensesnitt rundt Microsoft WebView2, ikke en ny nettmotor. Byggeindikatorene viser faktiske GitHub Actions-resultater når workflowene er kjørt. Ingen påstand om bedre ytelse eller sikkerhet enn Chrome og Firefox er dokumentert.
 
-## ✨ What is NOVA?
+## Opplevelsen
 
-NOVA is an open-source Windows browser project exploring what a browser can feel like when **personalization, clean UI, and simple controls** are treated as first-class features.
+En nettleser er et sted du tilbringer mye tid. NOVA utforsker hvordan dette stedet kan bli mer personlig, med synlige faner, et rolig arbeidsområde og innstillinger som starter med dine valg.
 
-It is not a new rendering engine. NOVA hosts **Microsoft WebView2 / Chromium** inside a custom WPF shell, while the browser experience itself is written in **Visual Basic .NET**.
+**Ambisjonen er å bli et alternativ du vil velge fremfor Chrome og Firefox.** Først må NOVA fortjene den plassen gjennom pålitelighet, god betjening og etterprøvbar testing.
 
-> **Project status:** early development. Expect rapid changes, rough edges, and breaking changes between versions.
+| Oversikt | Personlighet | Dine valg |
+| --- | --- | --- |
+| Vertikale faner og private faner | Midnight, Dawn, Forest og Graphite | Google, DuckDuckGo eller Bing |
+| Gjenåpne lukkede vanlige faner | Seks aksentfarger og tre bakgrunner | Veiviser ved første oppstart |
+| Bokmerker og lokal besøksliste | Animasjoner som kan slås av | Gjenoppretting av vanlige faner |
+| Kommandofelt med `Ctrl+K` | Personlig navn og klokke | Innstillinger lagres lokalt |
 
-## 🚀 Features
+Dette beskriver **implementert kildekode**, ikke en erklæring om at alle funksjoner er ferdig testet. Se [status og kjente begrensninger](docs/STATUS.md).
 
-- **Multi-tab browsing** with normal and private tabs
-- **First-run setup wizard** for search engine, theme, accent, animations, and privacy preferences
-- **Four built-in themes** — Midnight, Dawn, Forest, and Graphite
-- **Six accent colors** and multiple background styles
-- **Custom vector icons** with no external icon-font dependency
-- **Unified address + search bar**
-- **Google, DuckDuckGo, or Bing** as the default search provider
-- **Bookmarks and local browsing history**
-- **Session restore** for normal tabs
-- **Recently closed tabs** with `Ctrl + Shift + T`
-- **Command palette** with `Ctrl + K`
-- **Permission prompts** for camera, microphone, location, clipboard, and notifications
-- **Private browsing profile** for private tabs
-- **Keyboard-first navigation**
-- **Local settings storage** — no NOVA cloud account required
+## Bilder
 
-## 🖼️ Screenshots
+### Startside / Midnight
 
-Screenshots are coming as the UI stabilizes.
+<img src="docs/assets/previews/nova-midnight.png" alt="Merket HTML-rekonstruksjon av NOVA-startsiden med Midnight-tema." width="100%">
 
-> Want to help? Add screenshots to `docs/images/` and replace this section with real captures from the latest build.
+**Designforhåndsvisning, ikke skjermbilde fra Windows-appen.** Rekonstruert i HTML med utgangspunkt i XAML, ikonformene og fargepaletten i 0.2.0. Den faktiske appen kan se annerledes ut; kjente problemer med vindusknapper er ikke verifisert rettet.
 
-## ⚡ Quick start
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/previews/nova-dawn.png" alt="HTML-designforhåndsvisning av Dawn-tema"><b>Dawn</b><br>Lyst uttrykk / HTML-rekonstruksjon.</td>
+<td width="50%"><img src="docs/assets/previews/nova-forest.png" alt="HTML-designforhåndsvisning av Forest og Mint"><b>Forest + Mint</b><br>Grønn palett / HTML-rekonstruksjon.</td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/assets/previews/nova-setup.png" alt="HTML-designforhåndsvisning av søkemotorvalg i veiviseren"><b>Førstegangsoppsett</b><br>Søkemotorvalg / HTML-rekonstruksjon.</td>
+<td width="50%"><img src="docs/assets/previews/nova-settings.png" alt="HTML-designforhåndsvisning av innstillingspanelet"><b>Innstillinger</b><br>Personlig tilpasning / HTML-rekonstruksjon.</td>
+</tr>
+</table>
 
-### Requirements
+**Ekte skjermbilder av landingssiden:** [PC](docs/assets/screenshots/website-desktop.png) / [Mobil](docs/assets/screenshots/website-mobile.png). Disse er tatt ved rendering av den medfølgende nettsiden, ikke av NOVA-appen. [Bildeopprinnelse og fremgangsmåte](docs/VISUELT.md).
 
-- Windows 10 or Windows 11
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/)
+For ekte appbilder: start NOVA på Windows og kjør `TA-EKTE-SKJERMBILDE.bat`. Bildet må godkjennes før det flyttes til den publiserbare mappen.
 
-### Run from source
+## Kom i gang
+
+### Bygg og prøv appen
+
+Du trenger Windows x64, [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) og [Microsoft WebView2 Runtime](https://developer.microsoft.com/microsoft-edge/webview2/). Bruk en Windows-utgave som fortsatt mottar relevante sikkerhetsoppdateringer.
 
 ```powershell
 git clone https://github.com/Darschnid479/NovaBrowser.git
 cd NovaBrowser
-dotnet run --project src/NovaBrowser/NovaBrowser.vbproj -c Release
+.\START-NOVA.cmd
 ```
 
-Or on Windows, double-click:
+Nedlastet ZIP? Pakk ut **hele** arkivet og dobbeltklikk `START-NOVA.cmd`. Ikke kjør filer direkte inne i ZIP-vinduet.
+
+| Fil | Bruk |
+| --- | --- |
+| `START-NOVA.cmd` | Kontroller, bygg og start appen. |
+| `BYGG-EXE.cmd` | Publiser en komplett Windows x64-mappe til `out\win-x64`. |
+| `TEST-NOVA.cmd` / `TEST-UI.cmd` | Kjør modell-/adressekontroller og Windows UI-kontroller. |
+| `SE-NETTSIDEN.bat` | Åpne landingssiden lokalt. Ingen bygging nødvendig. |
+| `LAST-OPP-NOVA-TIL-GITHUB.bat` | Vis endringer, be om godkjenning og last opp kildepakken. |
+| `TA-EKTE-SKJERMBILDE.bat` | Ta og godkjenn ett ekte bilde av NOVA-vinduet. |
+
+**Kildepakken inneholder ikke en testet EXE, installasjonsfil eller medfølgende runtime.** En publisering med `--self-contained true` inkluderer .NET i resultatmappen, men WebView2 Runtime er fortsatt et eget krav. Behold alle filene i `out\win-x64` samlet.
+
+### Last opp til GitHub
+
+`LAST-OPP-NOVA-TIL-GITHUB.bat` er satt opp for **Darschnid479/NovaBrowser**. Den bruker Git på PC-en og lager en separat, midlertidig arbeidskopi av repoet. Deretter legger den inn kildepakken og viser hvilke filer som endres. Skriv `JA` for å godkjenne.
+
+Den endrer ikke din eksisterende lokale Git-historikk, bruker ikke force-push, og sletter ikke filer som bare finnes på GitHub. Filer med samme navn kan oppdateres **etter godkjenning**. Ved avvist push stopper den. Filtrering og en enkel hemmelighetskontroll erstatter ikke din egen gjennomgang.
+
+[Full opplastingsveiledning](docs/maintainers/UPLOAD.md) / [Aktiver GitHub Pages](docs/maintainers/GITHUB-SETUP.md).
+
+## Hurtigtaster
+
+| Handling | Tast |
+| --- | --- |
+| Ny fane / lukk fane | `Ctrl+T` / `Ctrl+W` |
+| Privat fane / gjenåpne lukket vanlig fane | `Ctrl+Shift+N` / `Ctrl+Shift+T` |
+| Adresse / kommandoer | `Ctrl+L` / `Ctrl+K` |
+| Bytt fane | `Ctrl+Tab` / `Ctrl+Shift+Tab` |
+| Bokmerke / historikk / nedlastinger | `Ctrl+D` / `Ctrl+H` / `Ctrl+J` |
+| Vis eller skjul sidefelt | `Ctrl+B` |
+
+## Bygget med
 
 ```text
-START-NOVA.cmd
+NOVA.sln
+src/NovaBrowser/       VB.NET-appen, XAML, ikoner, innstillinger og nettmotorintegrasjon
+  UI/                  Felles stiler og temafarger
+  Services/            Adressepolicy, søkeleverandører, lagring og feillogg
+  Models/              Faner, veiviser og lokal tilstand
+tests/                 Adresse-/modellkontroller, WPF UI-kontroller, opplastingstester
+docs/                  Landingsside, visuelle ressurser og prosjektdokumentasjon
+tools/                 Opplasting, skjermbildeverktøy og kildekontroll
+.github/               Bygging, nettsjekk, Pages, releasekladd og saksmaler
 ```
 
-### Build a Windows package
+[Arkitektur](docs/ARKITEKTUR.md) / [Personvern](docs/PRIVACY.md) / [Sikkerhet](SECURITY.md) / [Endringslogg](CHANGELOG.md).
 
-```text
-BYGG-EXE.cmd
-```
+## Veien videre
 
-The published build is placed in:
+**Nå:** dokumentere og stabilisere funksjonene i 0.2.0. **Neste:** verifisere vindusbetjening, skalering, tastaturflyt og nettleserøkter. **Senere:** vurdere fanegrupper, sovende faner, signerte utgivelser og oppdateringer.
 
-```text
-out\win-x64\
-```
+Passordbehandler, utvidelsesbutikk, synkronisering, automatisk appoppdatering og ferdig installasjonsprogram er **ikke inkludert**. Se [veikart med kvalitetskrav](docs/ROADMAP.md); ingen frister er lovet.
 
-Keep the entire output folder together; NOVA is not currently published as a single self-contained executable.
+## Bidra
 
-## 🎨 Personalization
+Rapporter en konkret feil med versjon, Windows-versjon og trinn som gjenskaper problemet. Ikke legg ved passord, tokens, profilmappen eller en uredigert privat feillogg. [Bidragsveiledning](CONTRIBUTING.md) / [Ny sak](https://github.com/Darschnid479/NovaBrowser/issues/new/choose).
 
-NOVA is designed to feel personal without requiring an account.
+## Lisens
 
-| Setting | Options |
-|---|---|
-| Theme | Midnight · Dawn · Forest · Graphite |
-| Accent | Iris · Cyan · Mint · Coral · Gold · Blue |
-| Background | Aurora · Orbit · None |
-| Search | Google · DuckDuckGo · Bing |
-| Motion | On / Off |
-| Session restore | On / Off |
-| NOVA history | On / Off |
-
-## ⌨️ Keyboard shortcuts
-
-| Shortcut | Action |
-|---|---|
-| `Ctrl + T` | New tab |
-| `Ctrl + W` | Close tab |
-| `Ctrl + Shift + N` | New private tab |
-| `Ctrl + Shift + T` | Reopen closed tab |
-| `Ctrl + Tab` | Next tab |
-| `Ctrl + Shift + Tab` | Previous tab |
-| `Ctrl + L` | Focus address bar |
-| `Ctrl + K` | Open command palette |
-| `Ctrl + D` | Bookmark current page |
-| `Ctrl + H` | Open history |
-| `Ctrl + J` | Open downloads |
-| `Ctrl + B` | Toggle sidebar |
-| `Alt + Left / Right` | Back / forward |
-| `Ctrl + R` / `F5` | Reload |
-| `Ctrl + + / - / 0` | Zoom in / out / reset |
-
-## 🧱 Architecture
-
-```text
-NOVA Browser
-├─ WPF UI / custom chrome
-├─ Tab + browser state management
-├─ Search / URL policy
-├─ Local state store
-├─ Permissions + popup handling
-└─ Microsoft WebView2
-   └─ Chromium rendering engine
-```
-
-Key files:
-
-- `src/NovaBrowser/MainWindow.xaml` — main window layout
-- `src/NovaBrowser/MainWindow.xaml.vb` — tabs and browser engine integration
-- `src/NovaBrowser/MainWindow.Interactions.vb` — user actions and settings
-- `src/NovaBrowser/MainWindow.Setup.vb` — first-run wizard
-- `src/NovaBrowser/MainWindow.Privacy.vb` — permissions and privacy actions
-- `src/NovaBrowser/UI/Styles.xaml` — shared UI styles
-- `src/NovaBrowser/UI/ThemeManager.vb` — themes and accents
-- `src/NovaBrowser/Services/UrlPolicy.vb` — address/search behavior
-- `src/NovaBrowser/Services/StateStore.vb` — local persistence
-
-More detail: [`docs/ARKITEKTUR.md`](docs/ARKITEKTUR.md)
-
-## 🗺️ Roadmap
-
-NOVA is still young. Planned areas include:
-
-- [ ] Proper window controls and maximized-by-default startup
-- [ ] Drag-and-drop tab reordering
-- [ ] Better tab search and tab groups
-- [ ] Installer and signed releases
-- [ ] Automatic update flow
-- [ ] Password / credential integration strategy
-- [ ] Extension strategy
-- [ ] Sleeping/background tab management
-- [ ] Multiple windows
-- [ ] Better downloads UI
-- [ ] More accessibility testing
-- [ ] Performance profiling and startup optimization
-- [ ] Real screenshot gallery and release demo video
-
-Have an idea? Open a [feature request](../../issues/new?template=feature_request.yml).
-
-## 🔐 Privacy & data
-
-NOVA does not add its own analytics or cloud account system.
-
-Local data is stored under:
-
-```text
-%LOCALAPPDATA%\NOVA-Browser
-```
-
-This can include settings, bookmarks, NOVA history, session state, WebView2 browser data, and error logs. Private browsing is **not anonymity**: websites, network administrators, and internet providers may still observe traffic.
-
-See the existing privacy and verification notes in the project documentation before relying on NOVA for sensitive browsing.
-
-## ⚠️ Current limitations
-
-NOVA is a browser shell around WebView2, not a new web engine. Performance and security have not been benchmarked against Chrome, Firefox, Edge, or other production browsers.
-
-Known project limitations currently include no extension store, no cloud sync, no built-in password manager, no auto-updater, no installer, and incomplete multi-window / tab-dragging support. DRM-protected playback can also be limited by the chosen WebView2 composition control.
-
-## 🛠️ Development
-
-Run project checks:
-
-```powershell
-dotnet run --project tests/NovaBrowser.Checks/NovaBrowser.Checks.vbproj -c Release
-```
-
-Run the Windows UI checks:
-
-```text
-TEST-UI.cmd
-```
-
-The repository includes a GitHub Actions workflow for Windows builds in:
-
-```text
-.github/workflows/windows-build.yml
-```
-
-## 🤝 Contributing
-
-Contributions, bug reports, UI ideas, and testing feedback are welcome.
-
-Before opening a pull request, please read [`CONTRIBUTING.md`](CONTRIBUTING.md).
-
-- Bug? Use the bug report template.
-- Idea? Use the feature request template.
-- Security concern? Please read [`SECURITY.md`](SECURITY.md) first.
-
-## 📄 License
-
-NOVA Browser is released under the [MIT License](LICENSE).
-
-Microsoft WebView2 and other dependencies remain subject to their own licenses and terms.
+[MIT](LICENSE). Appens eksisterende lisens er beholdt. .NET, WebView2 og andre avhengigheter har egne vilkår. Ingen fontfiler er inkludert.
 
 ---
 
-<div align="center">
-
-**NOVA Browser** · Built in Visual Basic .NET · Designed for Windows
-
-⭐ If you like the direction of the project, star the repository.
-
-</div>
+<div align="center"><b>NOVA Browser</b><br>Et personlig utgangspunkt. En stor ambisjon.</div>

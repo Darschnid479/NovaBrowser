@@ -1,9 +1,7 @@
-# Code of Conduct
+# Samarbeid
 
-Be respectful, constructive, and focused on improving the project.
+Vær saklig, inkluderende og konkret. Diskuter kode, forslag og resultater, ikke personlige egenskaper. Trakassering, trusler, diskriminering og publisering av private opplysninger hører ikke hjemme her.
 
-Harassment, threats, discrimination, deliberate disruption, and publishing another person's private information are not acceptable.
+Respekter tilbakemeldinger og vedlikeholderens avgjørelser om prosjektets omfang. Ikke press andre til å dele passord, feillogger med persondata eller innhold de ikke vil publisere.
 
-When reviewing code or discussing design, criticize the work rather than the person. Assume good intent where reasonable, explain disagreements clearly, and keep technical discussions productive.
-
-Project maintainers may remove content or restrict participation when needed to protect the community and the project.
+Kontakt repoets vedlikeholder via en tilgjengelig privat kanal ved en sensitiv samarbeidskonflikt; ikke publiser private opplysninger i en offentlig rapport. Eieren kan moderere innhold og begrense deltakelse for å beskytte samarbeidet.

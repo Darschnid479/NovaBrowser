@@ -1,18 +1,18 @@
-## What changed?
+## Endring
+Hva er endret, og hvorfor?
 
-Describe the change in a few sentences.
+## Testet
+- [ ] Kilde-/pakkekontroller
+- [ ] Windows-bygg
+- [ ] Modell-/adressekontroller
+- [ ] Windows UI-kontroller
+- [ ] Manuell test av berørt funksjon
 
-## Why?
+Versjon, Windows-versjon og skjermskalering:
 
-What problem does this solve or improve?
+Tester som ikke er kjørt:
 
-## Testing
-
-- [ ] Project checks pass
-- [ ] Windows build completes
-- [ ] I tested the affected UI/behavior
-- [ ] I added screenshots for visible UI changes, when relevant
-
-## Notes / known limitations
-
-Anything reviewers should know?
+## Bilder og data
+Ved UI-endring: legg ved ekte skjermbilde, eller merk illustrasjon tydelig.
+- [ ] Ingen passord, tokens, privat profil eller persondata er vedlagt.
+- [ ] Dokumentasjon skiller leverte funksjoner fra planer.

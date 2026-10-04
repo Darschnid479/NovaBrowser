@@ -1,49 +1,46 @@
-name: Bug report
-description: Report something that is broken in NOVA
-title: "[Bug] "
-labels: ["bug"]
+name: Feil i NOVA
+description: Rapporter et problem som kan gjenskapes.
+title: "[Feil]: "
 body:
   - type: markdown
     attributes:
-      value: "Thanks for helping improve NOVA. Remove personal information from logs before posting."
+      value: "Ikke legg ved passord, tokens, WebView2-profil eller private logger. For sikkerhetsfeil, les SECURITY.md."
   - type: input
     id: version
     attributes:
-      label: NOVA version or commit
-      placeholder: "0.2.0 or commit hash"
+      label: NOVA-versjon eller commit
+      placeholder: "0.2.0 / commit-ID"
     validations:
       required: true
   - type: input
-    id: windows
+    id: system
     attributes:
-      label: Windows version
-      placeholder: "Windows 11 24H2"
+      label: Windows-versjon og skjermskalering
+      placeholder: "Windows-versjon, 100/125/150/200 prosent"
     validations:
       required: true
   - type: textarea
-    id: problem
+    id: reproduce
     attributes:
-      label: What happened?
-      placeholder: "Describe the problem clearly."
-    validations:
-      required: true
-  - type: textarea
-    id: steps
-    attributes:
-      label: Steps to reproduce
-      placeholder: |
-        1. Open NOVA
-        2. ...
-        3. ...
+      label: Hvordan gjenskapes problemet?
+      description: "Beskriv hva du klikket eller skrev, i riktig rekkefølge."
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: Expected behavior
+      label: Forventet og faktisk oppførsel
+    validations:
+      required: true
   - type: textarea
-    id: logs
+    id: evidence
     attributes:
-      label: Relevant log excerpt
-      description: "Remove usernames, URLs, tokens, and personal information first."
-      render: text
+      label: Relevant skjermbilde eller redigert feilmelding
+      description: "Fjern persondata. Fortell om bildet er fra appen eller en designforhåndsvisning."
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Personvern
+      options:
+        - label: "Jeg har kontrollert at vedleggene ikke inneholder hemmeligheter eller privat nettleserdata."
+          required: true

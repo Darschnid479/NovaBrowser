@@ -1,0 +1,65 @@
+name: Prepare NOVA release draft
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag matching the app version, e.g. v0.2.0. Produces an unsigned DRAFT only.'
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Validate tag, app version and checked-out commit
+        shell: pwsh
+        run: |
+          if ($env:RELEASE_TAG -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+$') { throw 'Use a version tag such as v0.2.0' }
+          [xml]$project = Get-Content src/NovaBrowser/NovaBrowser.vbproj
+          if ($env:RELEASE_TAG -ne ('v' + $project.Project.PropertyGroup.Version)) { throw 'Tag does not match app version' }
+          $tagCommit = git rev-parse "refs/tags/$($env:RELEASE_TAG)^{commit}"
+          if ($LASTEXITCODE -ne 0) { throw 'Tag not found' }
+          $headCommit = git rev-parse HEAD
+          if ($tagCommit -ne $headCommit) { throw 'Tag and checkout do not match' }
+      - name: Source and package checks
+        shell: pwsh
+        run: |
+          python tools/check_source.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/check_package.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Model tests
+        run: dotnet run --project tests/NovaBrowser.Checks/NovaBrowser.Checks.vbproj -c Release
+      - name: WPF UI checks
+        run: dotnet run --project tests/NovaBrowser.UiChecks/NovaBrowser.UiChecks.vbproj -c Release
+      - name: Publish unsigned Windows test build
+        run: dotnet publish src/NovaBrowser/NovaBrowser.vbproj -c Release -r win-x64 --self-contained true -o out/win-x64 -p:PublishSingleFile=false
+      - name: ZIP and checksum
+        shell: pwsh
+        run: |
+          $zip = "out/NOVA-$($env:RELEASE_TAG)-win-x64.zip"
+          Compress-Archive -Path out/win-x64/* -DestinationPath $zip
+          $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $([IO.Path]::GetFileName($zip))" | Set-Content out/SHA256SUMS.txt -Encoding ascii
+      - name: Create draft prerelease for human review
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create $env:RELEASE_TAG "out/NOVA-$($env:RELEASE_TAG)-win-x64.zip" out/SHA256SUMS.txt --repo $env:GITHUB_REPOSITORY --verify-tag --draft --prerelease --title "NOVA $($env:RELEASE_TAG) - development preview" --notes-file docs/RELEASE-NOTES.md
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

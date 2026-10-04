@@ -1,26 +1,17 @@
-# Security Policy
+# Sikkerhet
 
-NOVA Browser is an early-stage project and is not yet positioned as a hardened production browser.
+NOVA er en utviklingsversjon, ikke en ferdig sikkerhetsrevidert nettleser. Ikke bruk en uprøvd bygging til sensitiv nettlesing.
 
-## Reporting a vulnerability
+## Rapportering
 
-Please avoid publishing exploit details in a public issue before a fix is available.
+Bruk GitHubs private sårbarhetsrapportering **dersom den er aktivert på repoets Security-side**. Hvis den ikke er tilgjengelig, be eieren om en privat kanal uten å legge sårbarhetsdetaljer, persondata, tokens eller utnyttelseskode i en offentlig sak. Denne pakken later ikke som en privat kanal allerede er satt opp.
 
-Until a dedicated private security channel is configured, open a minimal GitHub issue stating that you have a security concern and avoid including secrets, exploit payloads, personal data, or sensitive reproduction material in public.
+Problemer i WebView2/.NET kan også måtte meldes via Microsofts offisielle sikkerhetskanaler. Appspesifikke områder er navigasjon, tillatelser, eksterne protokoller, popups, nedlastinger, lokal lagring og private faner.
 
-## Scope
+## Utgivelser
 
-Security-sensitive areas include:
+Det er foreløpig ikke etablert en garantert vedlikeholdsperiode eller sikkerhetsoppdateringsrutine. Byggartefakter og releasekladder er usignerte med mindre en konkret utgivelse dokumenterer annet. Hashsummer er ikke det samme som kode-signering.
 
-- URL and navigation handling
-- permission prompts
-- popup behavior
-- WebView2 configuration
-- local state and profile handling
-- downloads
-- external protocol handling
-- private browsing behavior
+## Hemmeligheter i repoet
 
-## Important note
-
-NOVA uses Microsoft WebView2 as its web engine. Engine-level Chromium/WebView2 vulnerabilities should be reported through Microsoft's appropriate security channels as well.
+Opplasterens filtre er et supplement, ikke en full hemmelighetsskanner. Ved lekkasje må en nøkkel sperres/roteres; det holder ikke å slette filen i siste commit.

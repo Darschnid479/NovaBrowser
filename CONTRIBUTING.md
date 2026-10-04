@@ -1,61 +1,25 @@
-# Contributing to NOVA Browser
+# Bidra til NOVA
 
-Thanks for helping improve NOVA.
+NOVA er under utvikling. Små, etterprøvbare endringer er mer verdifulle enn store løfter.
 
-## Before you start
+## Feil
 
-- Search existing issues before opening a new one.
-- Keep changes focused and easy to review.
-- Do not weaken TLS, certificate, permission, or browser security behavior just to make a site work.
-- Do not commit secrets, local browser profiles, build output, or personal logs.
+Bruk saksmalen. Beskriv versjon, Windows-versjon, skjermskalering, forventet oppførsel, faktisk oppførsel og konkrete trinn. Et relevant skjermbilde er nyttig, men fjern privat informasjon. Ikke last opp profilmappen eller uredigerte sensitive logger.
 
-## Development setup
+## Kode
 
-Requirements:
-
-- Windows 10/11
-- .NET 10 SDK
-- WebView2 Runtime
-- Visual Studio with .NET desktop development, or the `dotnet` CLI
-
-Run the project:
+Lag en gren, hold endringen avgrenset og forklar hva du faktisk har testet. Appkoden er Visual Basic .NET med Option Strict; grensesnittet er WPF/XAML. Nettsiden er separat HTML/CSS/JavaScript. Ikke legg inn en ny appavhengighet bare for en enkel grafisk detalj.
 
 ```powershell
-dotnet run --project src/NovaBrowser/NovaBrowser.vbproj -c Release
-```
-
-Run checks:
-
-```powershell
+python tools/check_source.py
+python tools/check_package.py
 dotnet run --project tests/NovaBrowser.Checks/NovaBrowser.Checks.vbproj -c Release
+dotnet run --project tests/NovaBrowser.UiChecks/NovaBrowser.UiChecks.vbproj -c Release
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/Upload.Tests.ps1
 ```
 
-## Pull requests
+UI-testene krever Windows. Skriv tydelig hvilke tester du ikke har kjørt. Ikke merk en forhåndsvisning som et ekte app-skjermbilde.
 
-A good PR should:
+## Ytelse og sikkerhet
 
-1. Explain the problem and the chosen solution.
-2. Keep unrelated refactors out of the same PR.
-3. Include testing notes.
-4. Include screenshots for visible UI changes when possible.
-5. Mention any known limitations or follow-up work.
-
-## Code style
-
-- Prefer readable names over abbreviations.
-- Keep UI logic, state storage, URL policy, and privacy logic separated where practical.
-- Treat error handling and privacy behavior as part of the feature, not as an afterthought.
-- Avoid new dependencies unless they provide clear value.
-
-## Reporting bugs
-
-Please include:
-
-- NOVA version or commit
-- Windows version
-- What you expected
-- What actually happened
-- Steps to reproduce
-- Relevant `error.log` excerpt, after removing personal information
-
-Never publish your WebView2 profile or `state.json` if it contains private browsing data.
+Legg ved reproducerbar metode og rådata ved sammenlignende påstander. Sikkerhetsproblemer følger SECURITY.md. Ingen hardkodede tokens, konto-passord eller hemmelige testdata i en pull request.

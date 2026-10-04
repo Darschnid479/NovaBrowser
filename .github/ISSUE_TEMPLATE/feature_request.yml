@@ -1,24 +1,24 @@
-name: Feature request
-description: Suggest a new NOVA feature or UX improvement
-title: "[Feature] "
-labels: ["enhancement"]
+name: Forslag til forbedring
+description: Beskriv problemet før du foreslår løsningen.
+title: "[Forslag]: "
 body:
   - type: textarea
     id: problem
     attributes:
-      label: What problem would this solve?
-      placeholder: "Describe the user problem first."
+      label: Hvilket problem vil dette løse?
     validations:
       required: true
   - type: textarea
-    id: idea
+    id: solution
     attributes:
-      label: Proposed idea
-      placeholder: "How should NOVA behave?"
+      label: Hvordan bør det fungere?
     validations:
       required: true
   - type: textarea
-    id: details
+    id: alternatives
     attributes:
-      label: Extra context
-      placeholder: "Mockups, examples, trade-offs, or alternatives."
+      label: Alternativer og mulige ulemper
+  - type: textarea
+    id: testing
+    attributes:
+      label: Hvordan kan vi se at dette faktisk blir bedre?

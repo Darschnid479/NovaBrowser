@@ -6,3 +6,38 @@ out/
 *.suo
 *.log
 *.tmp
+
+# Local browser data, screenshots awaiting review, and secrets
+artifacts/
+WebView2/
+**/WebView2/
+profiles/
+logs/
+**/state.json
+**/Cookies
+**/History
+**/Login Data
+**/Local State
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.pem
+*.key
+credentials.json
+secrets.json
+id_rsa
+id_ed25519
+node_modules/
+__pycache__/
+.venv/
+.vscode/
+.idea/
+*.zip
+*.7z
+*.dll
+*.exe
+*.pdb
+.DS_Store
+Thumbs.db
