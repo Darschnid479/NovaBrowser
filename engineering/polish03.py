@@ -17,14 +17,29 @@ edit('tests/Upload.Tests.ps1',"$argsCommon=@{SourceRoot=$source;",'''foreach ($p
 }
 $argsCommon=@{SourceRoot=$source;''')
 edit('tests/Upload.Tests.ps1',"$files -match 'artifacts|bin/'", "$files -match 'artifacts|bin/|state\\.json'")
+edit('tests/NovaBrowser.ShellChecks/Program.vb','                Pump(3000)\n                For Each theme', '                Pump(5500)\n                For Each theme')
+edit('tests/NovaBrowser.ShellChecks/Program.vb','                If args.Contains("--live") Then LiveChecks.Run(window, output)', '''                CallMethod(window, "ToggleSidebar")
+                Pump(150)
+                Check("sidebar can be opened on compact desktops", Element(window, "Sidebar").Visibility = Visibility.Visible)
+                CaptureClient(window, Path.Combine(output, "nova-03-tabs-client.png"))
+                NativeSnapshot.Capture(window, Path.Combine(output, "nova-03-tabs-window.png"))
+                If args.Contains("--live") Then LiveChecks.Run(window, output)''')
 # Correct the generated site: the original JS concatenates strings, not templates.
 edit('engineering/present03.py',"js=js.replace('assets/previews/nova-','assets/app-0.3.0/nova-03-').replace('${theme}.png','${theme}-client.png').replace('${key}.png','${key}-client.png')",'''js=js.replace('assets/previews/nova-','assets/app-0.3.0/nova-03-').replace('${theme}.png','${theme}-client.png').replace('${key}.png','${key}-client.png')
 js=js.replace("+key+'.png'", "+key+'-client.png'").replace('HTML-designforhåndsvisning','Faktisk WPF-klientflate')
 js=js.replace('Forest + Mint. Dype grønntoner og en frisk aksent.', 'Forest + Iris. Dype grønntoner med lilla aksenter.')
 js=js.replace('Graphite + Blue. Nøytral grå med en kjølig blå aksent.', 'Graphite + Iris. Nøytral grå med lilla aksenter.')''')
-# Include the now-extended, locally executed uploader test in the evidence bundle.
 edit('engineering/present03.py',"'publish.log','source-checks.log','package-checks.log']:","'publish.log','source-checks.log','package-checks.log','upload-tests.log']:")
-# Preserve pixel aspect ratios instead of the old reconstruction's fixed dimensions.
-edit('engineering/present03.py',"p.write_text(html,encoding='utf-8')",'''html=html.replace('width="1460" height="960"', 'width="1264" height="781"')
+edit('engineering/present03.py',"hero='nova-03-midnight-window.png' if (shots/'nova-03-midnight-window.png').exists() else 'nova-03-midnight-client.png'", "hero='nova-03-tabs-window.png' if (shots/'nova-03-tabs-window.png').exists() else 'nova-03-midnight-client.png'")
+# Use the exact PNG dimensions in HTML rather than legacy reconstruction sizes.
+edit('engineering/present03.py',"p.write_text(html,encoding='utf-8')",'''import struct
+for match in list(re.finditer(r'<img[^>]+src="(assets/app-0.3.0/[^\"]+)"[^>]*>', html)):
+    tag=match.group(0)
+    image=R/'docs'/match.group(1)
+    if image.is_file():
+        width,height=struct.unpack('>II', image.read_bytes()[16:24])
+        replacement=re.sub(r'width="[0-9]+"', f'width="{width}"', tag)
+        replacement=re.sub(r'height="[0-9]+"', f'height="{height}"', replacement)
+        html=html.replace(tag,replacement)
 p.write_text(html,encoding='utf-8')''')
 print('Native branding, backup filtering and screenshot presentation corrected')
