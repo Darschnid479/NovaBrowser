@@ -57,10 +57,12 @@ Namespace NovaBrowser
             Dim deferral = e.GetDeferral()
             Try
                 Dim requestPage = browserTab.View.CoreWebView2.Source
+                Dim requestVersion = browserTab.DocumentVersion
                 Dim origin = New Uri(e.Uri).GetLeftPart(UriPartial.Authority)
                 Dim allowed = Await AskAsync("Tillate tilgang til " & name & "?", origin & Environment.NewLine & Environment.NewLine & "Gi bare tilgang dersom du stoler på dette nettstedet. Valget lagres ikke som en varig tillatelse.", "Tillat")
-                If allowed AndAlso Not browserTab.Closed AndAlso Not _isClosing AndAlso browserTab Is _active AndAlso browserTab.View?.CoreWebView2 IsNot Nothing AndAlso browserTab.View.CoreWebView2.Source = requestPage Then
+                If allowed AndAlso Not browserTab.Closed AndAlso Not _isClosing AndAlso browserTab Is _active AndAlso browserTab.View?.CoreWebView2 IsNot Nothing AndAlso browserTab.View.CoreWebView2.Source = requestPage AndAlso browserTab.DocumentVersion = requestVersion Then
                     e.State = CoreWebView2PermissionState.Allow
+                    browserTab.HasSensitivePermission = True
                 End If
             Catch ex As Exception
                 StateStore.LogError(ex)
@@ -75,6 +77,7 @@ Namespace NovaBrowser
         End Function
 
         Private Function AskAsync(title As String, detail As String, yesText As String) As Task(Of Boolean)
+            CloseAddressSuggestions()
             If _isClosing OrElse _confirmCompletion IsNot Nothing Then Return Task.FromResult(False)
             _confirmCompletion = New TaskCompletionSource(Of Boolean)(TaskCreationOptions.RunContinuationsAsynchronously)
             ConfirmTitle.Text = title
@@ -108,7 +111,11 @@ Namespace NovaBrowser
             If Not Await AskAsync("Slette historikken?", "Dette fjerner NOVAs liste med tidligere besøkte sider og listen over nylig lukkede faner. Åpne faner og bokmerker blir beholdt.", "Slett historikken") Then Return
             _state.History.Clear()
             _closedTabs.Clear()
-            PersistState()
+            If Not PersistState() Then Return
+            If Not StateStore.ForgetRecoveryCopies() Then
+                ShowToast("Historikken er tom, men en sikkerhetskopi kunne ikke slettes. Se feilloggen.")
+                Return
+            End If
             RefreshLibrary()
             ShowToast("NOVAs historikk er slettet. Nye besøk lagres dersom historikk er slått på.")
         End Sub
@@ -123,7 +130,11 @@ Namespace NovaBrowser
                 Await normal.View.CoreWebView2.Profile.ClearBrowsingDataAsync(CoreWebView2BrowsingDataKinds.AllProfile)
                 _state.History.Clear()
                 _closedTabs.Clear()
-                PersistState()
+                If Not PersistState() Then Return
+                If Not StateStore.ForgetRecoveryCopies() Then
+                    ShowToast("Nettstedsdata er slettet, men en profilkopi kunne ikke slettes. Se feilloggen.")
+                    Return
+                End If
                 ShowToast("Nettstedsdata i den vanlige profilen er slettet. Bokmerkene er beholdt.")
             Catch ex As Exception
                 StateStore.LogError(ex)

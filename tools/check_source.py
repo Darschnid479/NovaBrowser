@@ -19,6 +19,7 @@ def check(label, condition):
 
 def run():
     for path in sorted(ROOT.rglob('*')):
+        if any(part in {'bin','obj','out','.git','artifacts'} for part in path.parts): continue
         if path.suffix in {'.xaml', '.vbproj', '.manifest'}:
             ET.parse(path)
             check('XML parses: ' + str(path.relative_to(ROOT)), True)
@@ -28,8 +29,9 @@ def run():
     markup = (SRC / 'MainWindow.xaml').read_text(encoding='utf-8')
     styles = (SRC / 'UI/Styles.xaml').read_text(encoding='utf-8')
     project = ET.parse(SRC / 'NovaBrowser.vbproj').getroot()
-    check('Release version is 0.2.0', project.findtext('.//Version') == '0.2.0')
+    check('Release version is 0.3.0', project.findtext('.//Version') == '0.3.0')
     check('Versioned Windows target retained', project.findtext('.//TargetFramework') == 'net10.0-windows10.0.17763.0')
+    check('Native close/min/max retained', 'WindowStyle="SingleBorderWindow"' in markup and '<shell:WindowChrome.WindowChrome>' not in markup)
     check('WPF enabled', project.findtext('.//UseWPF') == 'true')
     for prop, value in [('CopyLocalLockFileAssemblies','true'),('PublishTrimmed','false'),('PublishSingleFile','false')]:
         check(prop + ' retained', project.findtext('.//' + prop) == value)
@@ -38,7 +40,7 @@ def run():
     main = ET.fromstring(markup)
     names = [n.get(X + 'Name') for n in main.iter() if n.get(X + 'Name')]
     check('All main-window control names are unique', len(names) == len(set(names)))
-    events = {'Loaded','Closing','PreviewKeyDown','StateChanged','Click','KeyDown','SizeChanged','SelectionChanged','MouseLeftButtonDown','TextChanged','GotKeyboardFocus','LostKeyboardFocus','Checked','Unchecked','MouseUp','PreviewMouseDown'}
+    events = {'PreviewMouseRightButtonUp','MouseLeftButtonUp','Loaded','Closing','PreviewKeyDown','StateChanged','Click','KeyDown','SizeChanged','SelectionChanged','MouseLeftButtonDown','TextChanged','GotKeyboardFocus','LostKeyboardFocus','Checked','Unchecked','MouseUp','PreviewMouseDown'}
     used_handlers = set()
     for root in all_xaml:
         for node in root.iter():
@@ -46,7 +48,7 @@ def run():
                 if attr in events:
                     used_handlers.add(value)
                     check('Handler declared: ' + value, re.search(r'\b(?:Sub|Function)\s+' + re.escape(value) + r'\s*\(',vb,re.I) is not None)
-    for control in ['ReloadIcon','ConnectionIcon','BookmarkIcon','MaximizeIcon','HomeSearchHint','SetupLayer','SetupNextButton']:
+    for control in ['ReloadIcon','ConnectionIcon','BookmarkIcon','FocusModeButton','HomeSearchHint','SetupLayer','SetupNextButton']:
         check('Required named control exists: ' + control, names.count(control) == 1)
     check('No MDL2 dependency in current source', 'Segoe MDL2' not in markup + styles + vb)
     check('No private-use icon characters', not re.search('[\ue000-\uf8ff]', markup + styles + vb))
@@ -54,7 +56,7 @@ def run():
     check('Old font Glyph property removed', 'Binding Glyph' not in markup and 'NameOf(Glyph)' not in vb)
     icon_source = (SRC / 'UI/NovaIcon.vb').read_text()
     kinds = set(re.findall(r'\{"([^"\n]+)", "M', icon_source))
-    check('All 28 vector kinds are present', len(kinds) == 28)
+    check('All 32 vector kinds are present', len(kinds) == 32)
     for root in all_xaml:
         for node in root.iter():
             if node.tag.endswith('}NovaIcon'):
@@ -106,14 +108,14 @@ def run():
         check('ASCII launch script: '+path.name, data.isascii())
         check('CRLF launch script: '+path.name, b'\r\n' in data and b'\n' not in data.replace(b'\r\n',b''))
     banned={'.ttf','.otf','.woff','.woff2','.dll','.exe','.pdb','.log'}
-    check('No font, compiled, or user-log files shipped', not any(p.suffix.lower() in banned for p in ROOT.rglob('*') if p.is_file()))
+    check('No font, compiled, or user-log files shipped', not any(p.suffix.lower() in banned for p in ROOT.rglob('*') if p.is_file() and not any(part in {'bin','obj','out','.git','artifacts'} for part in p.parts)))
     check('No browser profile data shipped', not any(p.name in {'state.json','WebView2'} for p in ROOT.rglob('*')))
     return len(names),len(used_handlers)
 
 if __name__ == '__main__':
     try:
         names, handlers = run()
-        print('NOVA 0.2.0 STATIC SOURCE CHECKS - NOT A BUILD OR RUNTIME TEST')
+        print('NOVA 0.3.0 STATIC SOURCE CHECKS - NOT A BUILD OR RUNTIME TEST')
         for label in dict.fromkeys(passed):
             print('PASS: ' + label)
         print(f'PASS: {len(passed)} source assertions; {names} unique controls; {handlers} handlers.')

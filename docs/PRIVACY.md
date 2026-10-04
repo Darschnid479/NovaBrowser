@@ -1,13 +1,23 @@
-# Lokal lagring og personvern
+# Lokal lagring og personvern / 0.3.0
 
-Dette er en beskrivelse av kildekodens oppsett, ikke en uavhengig sikkerhetsrevisjon.
+Normal profil: `%LOCALAPPDATA%\NOVA-Browser`. Den kan inneholde navn, innstillinger, bokmerker, NOVAs lokale besøksliste, vanlige faner, WebView2-data og feillogg. Appdata er ikke et kryptert passordhvelv. Ikke last opp profilmappen.
 
-NOVA lagrer appens tilstand under `%LOCALAPPDATA%\NOVA-Browser`. Det kan omfatte navn, innstillinger, bokmerker, NOVAs besøksliste, vanlige faner, WebView2-profil og feillogg. Ikke last opp denne mappen til GitHub.
+## Lagrede kopier
 
-Det er ingen egen NOVA-konto eller NOVA-sky implementert. Det betyr ikke at alle nettverksforbindelser er borte: nettsteder, valgt søkemotor, WebView2 og runtime-oppdateringer kan ha egne nettverkstjenester og vilkår.
+`state.json` skrives via en midlertidig fil og atomisk utskifting. `state.json.bak` kan inneholde forrige gyldige tilstand, inkludert tidligere historikk. Ved skadet fil kan opptil tre `state.json.corrupt-*` beholdes for gjenoppretting. Handlingene for eksplisitt sletting av historikk/nettstedsdata fjerner også disse profilkopiene etter vellykket lagring. Feilloggen er separat og kan inneholde tekniske stier eller detaljer; gå gjennom den før deling.
 
-Valget om å ikke lagre **NOVAs besøksliste** er ikke det samme som å slette all data som nettmotoren lagrer. Private faner tas etter kodeoppsettet ikke med i NOVAs historikk/gjenoppretting. Privat nettlesing gjør deg ikke anonym for nettsteder, nettverkseier eller internettleverandør. Ikke stol på en uprøvd utviklingsversjon for sensitiv bruk.
+Å slå av lagring av NOVAs besøksliste sletter ikke tidligere historikk eller WebView2s øvrige data. Bruk de eksplisitte sletteknappene for eksisterende data.
 
-Opplastingsverktøyet utelater vanlige runtime-/profilmappenavn, byggemapper og enkelte private filer. Det ser også etter noen velkjente token-/nøkkelmønstre. Det er **ikke** en garanti mot lekkasje. Skjermbilder og vanlige dokumenter kan inneholde persondata som et slikt mønstersøk ikke fanger opp.
+## Adresseforslag og privat modus
 
-Skjermbildeverktøyet lagrer først i `artifacts/screenshots-pending/`, som ikke tas med av opplasteren. Først etter at brukeren har sett bildet og skrevet `JA`, kopieres det til `docs/assets/screenshots/`. Bare det valgte NOVA-vinduets synlige rektangel tas med; overliggende varsler kan fremdeles komme med og må kontrolleres.
+Adresseforslag kommer fra åpne faner, bokmerker og NOVAs lokale historikk; det finnes ingen ekstern autocomplete-tjeneste. Når du faktisk søker eller besøker en adresse, sendes den til valgt søkemotor/nettsted.
+
+Private faner bruker WebView2s InPrivate-profilvalg og tas ikke med i NOVAs lagrede økter eller historikk. Private forslag viser ikke normal historikk eller normale faner. Bokmerker er bevisst felles. En ny privat økt får et nytt midlertidig profilnavn. En isolert test av localStorage mellom normal og privat økt bestod; dette er ikke en full revisjon av alle WebView2-data.
+
+Nedlastingsmetadata holdes i minnet for økten. Private poster fjernes når eierfanen lukkes, men filer du selv lagrer er vanlige filer på disken. Privat betyr ikke anonym overfor nettsteder, nettverk eller internettleverandør.
+
+Det finnes ingen NOVA-konto eller NOVA-sky. Nettsteder, søkemotorer, WebView2 og runtime-oppdateringer kan ha egne nettverkstjenester og vilkår. Ikke bruk en utviklingsversjon som bevis for total anonymitet eller sikkerhet.
+
+## Testing og opplasting
+
+`NOVA_PROFILE_ROOT` lar testverktøy velge en separat, absolutt profilbane. Integrasjonstester bruker unike midlertidige mapper, ikke normalprofilen. GitHub-opplasteren filtrerer kjente profil-/byggefiler og enkelte hemmeligheter, men manuell gjennomgang er fortsatt nødvendig. Skjermbilder kan inneholde personopplysninger. `TA-EKTE-SKJERMBILDE.bat` ber om godkjenning før et eget skjermbilde blir publiserbart.

@@ -15,11 +15,14 @@ New-Item -ItemType Directory -Path (Join-Path $source 'src/NovaBrowser') -Force 
 New-Item -ItemType Directory -Path (Join-Path $source 'artifacts'),(Join-Path $source 'bin') -Force | Out-Null
 [IO.File]::WriteAllText((Join-Path $source 'artifacts/private.txt'),'private screenshot notes')
 [IO.File]::WriteAllText((Join-Path $source 'bin/build.txt'),'build output')
+foreach ($privateName in @('state.json','state.json.bak','state.json.corrupt-test','state.json.tmp-test')) {
+    [IO.File]::WriteAllText((Join-Path $source $privateName),'private profile fixture')
+}
 $argsCommon=@{SourceRoot=$source; RepoUrl=$repo; AuthorName='NOVA upload test'; AuthorEmail='test@example.invalid'}
 $r=Invoke-NovaUpload @argsCommon -Approve { $true }
 if (-not $r.Uploaded) { throw 'Empty remote upload failed' }
 $files=& git --git-dir=$repo ls-tree -r --name-only main
-if ($files -notcontains 'README.md' -or $files -match 'artifacts|bin/') { throw 'File filtering failed' }
+if ($files -notcontains 'README.md' -or $files -match 'artifacts|bin/|state\.json') { throw 'File filtering failed' }
 $r=Invoke-NovaUpload @argsCommon -Approve { throw 'No-change upload must not ask for approval' }
 if ($r.Changed) { throw 'No-change detection failed' }
 $before=& git --git-dir=$repo rev-parse main

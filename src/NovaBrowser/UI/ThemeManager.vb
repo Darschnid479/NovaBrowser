@@ -49,6 +49,19 @@ Namespace NovaBrowser
             resources("HomeBackground") = home
             resources("HaloBrush") = Halo(accent)
             resources("SecondaryHalo") = Halo(If(light, Color.FromRgb(42, 129, 128), Color.FromRgb(50, 169, 167)))
+            If SystemParameters.HighContrast Then
+                For Each name In New String() {"Bg", "Panel", "Elevated", "Field", "HomeBackground"}
+                    resources(name) = SystemColors.WindowBrush
+                Next
+                For Each name In New String() {"Text", "Muted", "Stroke", "Good", "Danger"}
+                    resources(name) = SystemColors.WindowTextBrush
+                Next
+                resources("Accent") = SystemColors.HighlightBrush
+                resources("AccentSoft") = SystemColors.HighlightBrush
+                resources("OnAccent") = SystemColors.HighlightTextBrush
+                resources("HaloBrush") = Brushes.Transparent
+                resources("SecondaryHalo") = Brushes.Transparent
+            End If
         End Sub
         Private Shared Function Halo(color As Color) As RadialGradientBrush
             Dim b As New RadialGradientBrush()

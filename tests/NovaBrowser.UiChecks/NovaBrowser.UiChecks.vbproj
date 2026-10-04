@@ -20,5 +20,7 @@
     <Compile Include="../../src/NovaBrowser/Services/UrlPolicy.vb" Link="UrlPolicy.vb" />
     <Compile Include="../../src/NovaBrowser/Services/SearchProviders.vb" Link="SearchProviders.vb" />
     <Page Include="../../src/NovaBrowser/UI/Styles.xaml" Link="UI/Styles.xaml" />
+    <Compile Include="../../src/NovaBrowser/Services/BrowserPolicies.vb" Link="BrowserPolicies.vb" />
+    <Compile Include="../../src/NovaBrowser/Services/ProfileRepository.vb" Link="ProfileRepository.vb" />
   </ItemGroup>
 </Project>

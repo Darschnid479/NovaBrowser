@@ -39,6 +39,8 @@ Namespace NovaBrowser
             AnimationsSetting.IsChecked = s.Animations
             ClockSetting.IsChecked = s.ShowClock
             CompactSetting.IsChecked = s.CompactTabs
+            MaximizedSetting.IsChecked = s.StartMaximized
+            SleepSetting.IsChecked = s.SleepingTabs
             RestoreSetting.IsChecked = s.RestoreSession
             HistorySetting.IsChecked = s.RecordHistory
             _settingsReady = True
@@ -56,10 +58,15 @@ Namespace NovaBrowser
             s.Animations = AnimationsSetting.IsChecked.GetValueOrDefault()
             s.ShowClock = ClockSetting.IsChecked.GetValueOrDefault()
             s.CompactTabs = CompactSetting.IsChecked.GetValueOrDefault()
+            s.StartMaximized = MaximizedSetting.IsChecked.GetValueOrDefault()
+            Dim resumeSleeping = s.SleepingTabs AndAlso Not SleepSetting.IsChecked.GetValueOrDefault()
+            s.SleepingTabs = SleepSetting.IsChecked.GetValueOrDefault()
+            ApplySleepPreference(resumeSleeping)
             s.RestoreSession = RestoreSetting.IsChecked.GetValueOrDefault()
             s.RecordHistory = HistorySetting.IsChecked.GetValueOrDefault()
             s.DefaultZoom = Integer.Parse(CStr(ZoomSetting.SelectedItem).Replace(" %", ""), CultureInfo.InvariantCulture) / 100.0
             ThemeManager.Apply(Application.Current.Resources, s)
+            UpdateNativeTitleBar()
             For Each browserTab In _tabs
                 If browserTab.View?.CoreWebView2 IsNot Nothing Then ConfigureWebView(browserTab)
             Next
@@ -133,17 +140,26 @@ Namespace NovaBrowser
         End Sub
 
         Private Sub ShowDrawer(mode As String)
+            CloseAddressSuggestions()
             CommandLayer.Visibility = Visibility.Collapsed
             _drawerMode = mode
             DrawerTitle.Text = If(mode = "settings", "Gjør NOVA til din.", If(mode = "bookmarks", "Dine bokmerker.", "Her har du vært."))
             SettingsScroller.Visibility = If(mode = "settings", Visibility.Visible, Visibility.Collapsed)
-            LibraryPanel.Visibility = If(mode = "settings", Visibility.Collapsed, Visibility.Visible)
-            If mode <> "settings" Then RefreshLibrary()
+            LibraryPanel.Visibility = If(mode = "bookmarks" OrElse mode = "history", Visibility.Visible, Visibility.Collapsed)
+            DownloadsPanel.Visibility = If(mode = "downloads", Visibility.Visible, Visibility.Collapsed)
+            If mode = "downloads" Then
+                DrawerTitle.Text = "Dine nedlastinger."
+                RefreshDownloads()
+            ElseIf mode <> "settings" Then
+                RefreshLibrary()
+            End If
             DrawerLayer.Visibility = Visibility.Visible
             RefreshInputScopes()
             AnimateEntrance(DrawerCard, 10)
             If mode = "settings" Then
                 NameSetting.Focus()
+            ElseIf mode = "downloads" Then
+                DownloadList.Focus()
             Else
                 LibraryList.Focus()
             End If
@@ -168,6 +184,7 @@ Namespace NovaBrowser
             Dim drawing = DrawerLayer.Visibility = Visibility.Visible
             Dim settingUp As Boolean = SetupLayer.Visibility = Visibility.Visible
             ShellBody.IsEnabled = Not (confirming OrElse commanding OrElse drawing OrElse settingUp)
+            ShellHeader.IsEnabled = ShellBody.IsEnabled
             DrawerLayer.IsEnabled = Not (confirming OrElse commanding OrElse settingUp)
             CommandLayer.IsEnabled = Not (confirming OrElse settingUp)
             SetupLayer.IsEnabled = Not confirming
@@ -186,6 +203,8 @@ Namespace NovaBrowser
             ElseIf DrawerLayer.Visibility = Visibility.Visible Then
                 If _drawerMode = "settings" Then
                     NameSetting.Focus()
+                ElseIf _drawerMode = "downloads" Then
+                    DownloadList.Focus()
                 Else
                     LibraryList.Focus()
                 End If
@@ -229,6 +248,7 @@ Namespace NovaBrowser
         End Sub
 
         Private Sub ShowCommands()
+            CloseAddressSuggestions()
             If ConfirmLayer.Visibility = Visibility.Visible Then Return
             DrawerLayer.Visibility = Visibility.Collapsed
             CommandLayer.Visibility = Visibility.Visible
@@ -251,7 +271,15 @@ Namespace NovaBrowser
                 New CommandItem With {.Label = "Vis / skjul sidefelt", .Hint = "Ctrl+B", .Execute = AddressOf ToggleSidebar},
                 New CommandItem With {.Label = "Tilbake til startsiden", .Hint = "Alt+Home", .Execute = Sub() ShowHome(_active)},
                 New CommandItem With {.Label = "Nedlastinger", .Hint = "Ctrl+J", .Execute = Async Sub() Await ShowDownloadsAsync()}}
+            commands.Add(New CommandItem With {.Label = "Fokusmodus", .Hint = "Ctrl+Shift+F", .Execute = AddressOf ToggleFocusMode})
+            commands.Add(New CommandItem With {.Label = "La bakgrunnsfaner hvile", .Hint = "Pause nettsider", .Execute = Async Sub() Await SleepBackgroundTabsAsync()})
+            commands.Add(New CommandItem With {.Label = "Fest eller løsne aktiv fane", .Hint = "Fane", .Execute = Sub() TogglePinned(_active)})
+            commands.Add(New CommandItem With {.Label = "Demp eller slå på lyd", .Hint = "Fane", .Execute = Sub() ToggleMuted(_active)})
+            commands.Add(New CommandItem With {.Label = "Dupliser aktiv fane", .Hint = "Fane", .Execute = Sub() DuplicateTab(_active)})
+            commands.Add(New CommandItem With {.Label = "Lagre nettsiden som PDF", .Hint = "Eksporter", .Execute = Async Sub() Await SavePagePdfAsync()})
+            commands.Add(New CommandItem With {.Label = "Skriv ut nettsiden", .Hint = "Ctrl+P", .Execute = AddressOf PrintCurrentPage})
             For Each browserTab In _tabs
+                If _active IsNot Nothing AndAlso browserTab.IsPrivate <> _active.IsPrivate Then Continue For
                 Dim target = browserTab
                 commands.Add(New CommandItem With {.Label = "Bytt til: " & target.Title, .Hint = If(target.IsPrivate, "Privat fane", "Fane"), .Execute = Sub() TabList.SelectedItem = target})
             Next
@@ -274,10 +302,11 @@ Namespace NovaBrowser
         End Sub
 
         Private Sub ToggleSidebar()
-            _sidebarVisible = Not _sidebarVisible
-            Sidebar.Visibility = If(_sidebarVisible, Visibility.Visible, Visibility.Collapsed)
-            SidebarColumn.Width = New GridLength(If(_sidebarVisible, 238, 0))
-            If _sidebarVisible Then AnimateEntrance(Sidebar, 8)
+            _sidebarManual = True
+            _sidebarVisible = Sidebar.Visibility <> Visibility.Visible
+            _focusMode = False
+            FocusModeButton.Content = "Fokus"
+            UpdateWorkbenchLayout()
         End Sub
 
         Private Sub ChangeZoom(delta As Double)
@@ -295,34 +324,52 @@ Namespace NovaBrowser
         End Sub
 
         Private Sub NavigateBack()
-            If _active?.View?.CoreWebView2 Is Nothing OrElse Not _active.View.CanGoBack Then Return
-            _active.IsHome = False
-            _active.ErrorMessage = ""
-            _active.View.GoBack()
-            UpdateViewVisibility()
+            Dim target = _active
+            If target?.View?.CoreWebView2 Is Nothing Then Return
+            Try
+                If Not target.View.CoreWebView2.CanGoBack Then Return
+                WakeTab(target)
+                target.IsHome = False
+                target.ErrorMessage = ""
+                target.View.CoreWebView2.GoBack()
+                UpdateViewVisibility()
+            Catch ex As Exception
+                ReportTabError(target, ex)
+            End Try
         End Sub
-
         Private Sub NavigateForward()
-            If _active?.View?.CoreWebView2 Is Nothing OrElse Not _active.View.CanGoForward Then Return
-            _active.IsHome = False
-            _active.ErrorMessage = ""
-            _active.View.GoForward()
-            UpdateViewVisibility()
+            Dim target = _active
+            If target?.View?.CoreWebView2 Is Nothing Then Return
+            Try
+                If Not target.View.CoreWebView2.CanGoForward Then Return
+                WakeTab(target)
+                target.IsHome = False
+                target.ErrorMessage = ""
+                target.View.CoreWebView2.GoForward()
+                UpdateViewVisibility()
+            Catch ex As Exception
+                ReportTabError(target, ex)
+            End Try
         End Sub
-
         Private Sub ReloadCurrent()
-            If _active Is Nothing OrElse _active.IsHome Then Return
-            If _active.ErrorMessage.Length > 0 Then
-                Retry_Click(Me, New RoutedEventArgs())
-            ElseIf _active.View?.CoreWebView2 IsNot Nothing Then
-                If _active.IsLoading Then
-                    _active.View.CoreWebView2.Stop()
-                    _active.IsLoading = False
-                    UpdateChrome()
-                Else
-                    _active.View.Reload()
+            Dim target = _active
+            If target Is Nothing OrElse target.IsHome Then Return
+            Try
+                If target.ErrorMessage.Length > 0 Then
+                    Retry_Click(Me, New RoutedEventArgs())
+                ElseIf target.View?.CoreWebView2 IsNot Nothing Then
+                    WakeTab(target)
+                    If target.IsLoading Then
+                        target.View.CoreWebView2.Stop()
+                        target.IsLoading = False
+                        UpdateChrome()
+                    Else
+                        target.View.CoreWebView2.Reload()
+                    End If
                 End If
-            End If
+            Catch ex As Exception
+                ReportTabError(target, ex)
+            End Try
         End Sub
 
         Private Sub CycleTab(direction As Integer)
@@ -338,6 +385,7 @@ Namespace NovaBrowser
 
         Private Sub Window_PreviewKeyDown(sender As Object, e As KeyEventArgs)
             Dim pressedKey As Key = If(e.Key = Key.System, e.SystemKey, e.Key)
+            If pressedKey = Key.F4 AndAlso (Keyboard.Modifiers And ModifierKeys.Alt) <> 0 Then Return
             If ConfirmLayer.Visibility = Visibility.Visible Then
                 If pressedKey = Key.Escape Then CompleteConfirmation(False)
                 If pressedKey <> Key.Tab AndAlso pressedKey <> Key.Enter AndAlso pressedKey <> Key.Space Then e.Handled = True
@@ -387,6 +435,9 @@ Namespace NovaBrowser
                     Case Key.H : action = Sub() ShowDrawer("history")
                     Case Key.J : action = Async Sub() Await ShowDownloadsAsync()
                     Case Key.R : action = AddressOf ReloadCurrent
+                    Case Key.P : action = AddressOf PrintCurrentPage
+                    Case Key.F
+                        If shift Then action = AddressOf ToggleFocusMode
                     Case Key.D0, Key.NumPad0 : action = AddressOf ResetZoom
                     Case Key.OemPlus, Key.Add : action = Sub() ChangeZoom(0.1)
                     Case Key.OemMinus, Key.Subtract : action = Sub() ChangeZoom(-0.1)
@@ -412,9 +463,28 @@ Namespace NovaBrowser
         End Sub
 
         Private Async Sub AddressBox_KeyDown(sender As Object, e As KeyEventArgs)
+            If e.Key = Key.Escape Then
+                CloseAddressSuggestions()
+                UpdateChrome(True)
+                FocusActivePage()
+                e.Handled = True
+                Return
+            End If
+            If AddressSuggestions.IsOpen AndAlso (e.Key = Key.Down OrElse e.Key = Key.Up) Then
+                Dim direction = If(e.Key = Key.Down, 1, -1)
+                SuggestionList.SelectedIndex = Math.Clamp(SuggestionList.SelectedIndex + direction, 0, Math.Max(0, SuggestionList.Items.Count - 1))
+                If SuggestionList.SelectedItem IsNot Nothing Then SuggestionList.ScrollIntoView(SuggestionList.SelectedItem)
+                e.Handled = True
+                Return
+            End If
             If e.Key <> Key.Enter Then Return
             e.Handled = True
-            Await NavigateAsync(_active, AddressBox.Text)
+            If AddressSuggestions.IsOpen AndAlso SuggestionList.SelectedItem IsNot Nothing Then
+                Await AcceptAddressSuggestionAsync()
+            Else
+                CloseAddressSuggestions()
+                Await NavigateAsync(_active, AddressBox.Text)
+            End If
         End Sub
         Private Sub AddressBox_GotKeyboardFocus(sender As Object, e As KeyboardFocusChangedEventArgs)
             AddressBox.SelectAll()
@@ -557,9 +627,8 @@ Namespace NovaBrowser
         End Sub
         Private Sub Window_StateChanged(sender As Object, e As EventArgs)
             If WindowFrame Is Nothing Then Return
-            WindowFrame.Padding = New Thickness(If(WindowState = WindowState.Maximized, 7, 0))
-            If MaximizeIcon IsNot Nothing Then MaximizeIcon.Kind = If(WindowState = WindowState.Maximized, "Restore", "Maximize")
             ConfigureAmbientMotion()
+            UpdateWorkbenchLayout()
         End Sub
         Private Sub Connection_Click(sender As Object, e As RoutedEventArgs)
             If _active Is Nothing Then Return
@@ -574,25 +643,9 @@ Namespace NovaBrowser
         Private Async Sub Downloads_Click(sender As Object, e As RoutedEventArgs)
             Await ShowDownloadsAsync()
         End Sub
-        Private Async Function ShowDownloadsAsync() As Task
-            Dim browserTab = _active
-            If browserTab Is Nothing Then Return
-            Try
-                If Not Await EnsureViewAsync(browserTab) Then Return
-                If browserTab.Closed OrElse _isClosing Then Return
-                If browserTab.IsHome Then
-                    browserTab.IsHome = False
-                    browserTab.Title = "Nedlastinger"
-                    browserTab.Address = "about:blank"
-                    browserTab.NotifyLocation()
-                    UpdateViewVisibility()
-                    UpdateChrome(True)
-                End If
-                browserTab.View.CoreWebView2.OpenDefaultDownloadDialog()
-            Catch ex As Exception
-                StateStore.LogError(ex)
-                ShowToast("Nedlastingsvinduet kunne ikke åpnes. Åpne en nettside og prøv igjen.")
-            End Try
+        Private Function ShowDownloadsAsync() As Task
+            ShowDrawer("downloads")
+            Return Task.CompletedTask
         End Function
     End Class
 End Namespace

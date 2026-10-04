@@ -43,6 +43,7 @@ Namespace NovaBrowser
             InitializeComponent()
             TabList.ItemsSource = _tabs
             InitializePreferences()
+            InitializeWorkbench()
             AddHandler _clock.Tick, Sub(s, e) UpdateClock()
             AddHandler _saveTimer.Tick,
                 Sub(s, e)
@@ -61,6 +62,8 @@ Namespace NovaBrowser
             UpdateHome()
             UpdateClock()
             _clock.Start()
+            If _state.Settings.StartMaximized Then WindowState = WindowState.Maximized
+            UpdateWorkbenchLayout()
             If _state.Settings.SetupCompleted Then
                 StartBrowsingSession()
             Else
@@ -72,17 +75,28 @@ Namespace NovaBrowser
         Private Sub StartBrowsingSession()
             If _sessionInitialized Then Return
             _sessionInitialized = True
-            If _state.Settings.RestoreSession Then
+            Dim restore = _state.Settings.RestoreSession
+            If restore AndAlso Not _state.LastExitClean AndAlso _state.Session.Count > 0 Then
+                restore = MessageBox.Show(Me, "NOVA ble ikke avsluttet normalt. Gjenopprette de vanlige fanene? Velg Nei for en ren start. Private faner gjenopprettes aldri.", "Gjenopprett faner", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) = MessageBoxResult.Yes
+            End If
+            If restore Then
                 For Each saved In _state.Session.ToArray()
                     Dim browserTab = CreateTab(saved.Url, False, False)
-                    If browserTab IsNot Nothing Then browserTab.Title = UrlPolicy.CleanTitle(saved.Title)
+                    If browserTab IsNot Nothing Then
+                        browserTab.Title = UrlPolicy.CleanTitle(saved.Title)
+                        browserTab.IsPinned = saved.IsPinned
+                        browserTab.IsMuted = saved.IsMuted
+                        browserTab.Zoom = saved.Zoom
+                    End If
                 Next
             End If
             If _tabs.Count = 0 Then CreateTab(UrlPolicy.HomeUrl, False, False)
+            _state.LastExitClean = False
             _restoring = False
             TabList.SelectedIndex = Math.Clamp(_state.ActiveSessionIndex, 0, _tabs.Count - 1)
             UpdateHome()
             UpdateClock()
+            PersistState()
         End Sub
 
         Private Function CreateTab(Optional address As String = UrlPolicy.HomeUrl, Optional isPrivate As Boolean = False, Optional selectTab As Boolean = True) As BrowserTab
@@ -105,7 +119,10 @@ Namespace NovaBrowser
 
         Private Async Sub TabList_SelectionChanged(sender As Object, e As SelectionChangedEventArgs)
             If _restoring OrElse _isClosing Then Return
+            CloseAddressSuggestions()
+            If _active IsNot Nothing Then _active.LastActiveUtc = DateTimeOffset.UtcNow
             _active = TryCast(TabList.SelectedItem, BrowserTab)
+            WakeTab(_active)
             UpdateViewVisibility()
             UpdateChrome(True)
             If _active IsNot Nothing Then
@@ -143,20 +160,26 @@ Namespace NovaBrowser
             LoadingBar.IsIndeterminate = MotionEnabled
             LoadingBar.Value = 100
             LoadingBar.Visibility = If(_active.IsLoading, Visibility.Visible, Visibility.Collapsed)
-            If replaceAddress OrElse Not AddressBox.IsKeyboardFocusWithin Then AddressBox.Text = _active.Address
+            If replaceAddress OrElse Not AddressBox.IsKeyboardFocusWithin Then
+                _updatingAddress = True
+                AddressBox.Text = _active.Address
+                _updatingAddress = False
+            End If
             Dim isHttps = _active.Address.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
             ' HTTPS only describes transport; it is not a verdict that a website is safe.
             ConnectionIcon.Kind = If(isHttps, "Lock", If(_active.IsHome, "Home", "Globe"))
             ConnectionButton.ToolTip = If(_active.IsHome, "NOVA-startside", If(isHttps, "HTTPS-adresse. Klikk for forklaring.", "HTTP-adresse: ikke kryptert."))
             BookmarkIcon.Kind = If(_state.Bookmarks.Any(Function(p) p.Url = _active.Address), "StarFilled", "Star")
             ZoomButton.Content = CInt(_active.Zoom * 100).ToString() & " %"
-            WindowCaption.Text = If(_active.IsPrivate, "Privat fane", _active.Title) & "  /  NOVA"
+            WindowCaption.Text = If(_active.IsPrivate, "PRIVAT ØKT / Besøkslisten er av", "Din arbeidsflate. Ditt fokus.") & "  /  NOVA"
             Me.Title = If(_active.IsPrivate, "Privat fane", _active.Title) & " - NOVA"
             StatusText.Text = If(_active.IsPrivate, "PRIVAT / ikke anonym på nettet", If(_active.IsHome, "NOVA / startside", If(isHttps, "HTTPS-adresse", "HTTP / ikke kryptert")))
         End Sub
 
         Private Async Function NavigateAsync(browserTab As BrowserTab, input As String) As Task
             If browserTab Is Nothing OrElse browserTab.Closed OrElse _isClosing Then Return
+            CloseAddressSuggestions()
+            WakeTab(browserTab)
             Try
                 Dim address = UrlPolicy.Resolve(input, _state.Settings.SearchEngine)
                 If address = UrlPolicy.HomeUrl Then
@@ -190,6 +213,8 @@ Namespace NovaBrowser
 
         Private Sub ShowHome(browserTab As BrowserTab)
             If browserTab Is Nothing OrElse browserTab.Closed Then Return
+            CloseAddressSuggestions()
+            WakeTab(browserTab)
             browserTab.NavigationVersion += 1
             browserTab.IsHome = True
             browserTab.Title = "Ny fane"
@@ -197,7 +222,16 @@ Namespace NovaBrowser
             browserTab.IsLoading = False
             browserTab.ErrorMessage = ""
             browserTab.NotifyLocation()
-            If browserTab.View?.CoreWebView2 IsNot Nothing Then browserTab.View.CoreWebView2.Navigate("about:blank")
+            If browserTab.View?.CoreWebView2 IsNot Nothing Then
+                Try
+                    browserTab.HomeBlankPending = True
+                    browserTab.View.CoreWebView2.Stop()
+                    browserTab.View.CoreWebView2.Navigate("about:blank")
+                Catch ex As Exception
+                    StateStore.LogError(ex)
+                    ReleaseTabView(browserTab)
+                End Try
+            End If
             If browserTab Is _active Then
                 HomeSearchBox.Clear()
                 UpdateViewVisibility()
@@ -213,37 +247,47 @@ Namespace NovaBrowser
         End Function
 
         Private Async Function InitializeViewAsync(browserTab As BrowserTab) As Task(Of Boolean)
+            Dim epoch = browserTab.ViewEpoch
+            Dim lifetime As New System.Threading.CancellationTokenSource()
+            browserTab.InitializationCancellation = lifetime
             Try
                 If _environment Is Nothing Then
                     _environment = CoreWebView2Environment.CreateAsync(userDataFolder:=StateStore.WebDataFolder)
                 End If
-                Dim env = Await _environment
-                If browserTab.Closed OrElse _isClosing Then Return False
+                Dim env = Await _environment.WaitAsync(TimeSpan.FromSeconds(30), lifetime.Token)
+                If browserTab.Closed OrElse _isClosing OrElse epoch <> browserTab.ViewEpoch Then Return False
                 Dim view As New WebView2CompositionControl With {.ZoomFactor = browserTab.Zoom, .AllowExternalDrop = False, .Visibility = Visibility.Hidden}
                 browserTab.View = view
                 BrowserHost.Children.Add(view)
                 Dim options = env.CreateCoreWebView2ControllerOptions()
                 options.ProfileName = If(browserTab.IsPrivate, _privateProfile, "Default")
                 options.IsInPrivateModeEnabled = browserTab.IsPrivate
-                Await view.EnsureCoreWebView2Async(env, options)
-                If browserTab.Closed OrElse _isClosing Then
-                    ReleaseTabView(browserTab)
+                Await view.EnsureCoreWebView2Async(env, options).WaitAsync(TimeSpan.FromSeconds(30), lifetime.Token)
+                If browserTab.Closed OrElse _isClosing OrElse epoch <> browserTab.ViewEpoch OrElse browserTab.View IsNot view Then
+                    If browserTab.View Is view Then ReleaseTabView(browserTab)
                     Return False
                 End If
                 ConfigureWebView(browserTab)
                 AttachWebEvents(browserTab)
                 UpdateViewVisibility()
                 Return True
+            Catch ex As OperationCanceledException When lifetime.IsCancellationRequested
+                Return False
             Catch ex As Exception
+                If epoch <> browserTab.ViewEpoch Then Return False
                 If _environment IsNot Nothing AndAlso _environment.IsFaulted Then _environment = Nothing
                 ReleaseTabView(browserTab)
                 ReportTabError(browserTab, ex)
                 Return False
+            Finally
+                If browserTab.InitializationCancellation Is lifetime Then browserTab.InitializationCancellation = Nothing
+                lifetime.Dispose()
             End Try
         End Function
 
         Private Sub ConfigureWebView(browserTab As BrowserTab)
             Dim core = browserTab.View.CoreWebView2
+            core.IsMuted = browserTab.IsMuted
             core.Settings.AreHostObjectsAllowed = False
             core.Settings.IsWebMessageEnabled = False
             core.Settings.IsStatusBarEnabled = False
@@ -254,65 +298,105 @@ Namespace NovaBrowser
             core.Profile.PreferredColorScheme = If(_state.Settings.Theme = "Dawn", CoreWebView2PreferredColorScheme.Light, CoreWebView2PreferredColorScheme.Dark)
         End Sub
 
+        Private Function IsCurrentView(target As BrowserTab, view As WebView2CompositionControl) As Boolean
+            Return Not _isClosing AndAlso Not _fatalShutdown AndAlso Not target.Closed AndAlso target.View Is view
+        End Function
         Private Sub AttachWebEvents(browserTab As BrowserTab)
-            Dim core = browserTab.View.CoreWebView2
-            AddHandler core.NavigationStarting, Sub(s, e) OnNavigationStarting(browserTab, e)
-            AddHandler core.NavigationCompleted, Sub(s, e) OnNavigationCompleted(browserTab, e)
+            Dim view = browserTab.View
+            Dim core = view.CoreWebView2
+            AddHandler core.NavigationStarting,
+                Sub(sender, args)
+                    If IsCurrentView(browserTab, view) Then
+                        OnNavigationStarting(browserTab, args)
+                    Else
+                        args.Cancel = True
+                    End If
+                End Sub
+            AddHandler core.NavigationCompleted,
+                Sub(sender, args)
+                    If IsCurrentView(browserTab, view) Then OnNavigationCompleted(browserTab, args)
+                End Sub
             AddHandler core.SourceChanged,
-                Sub(s, e)
-                    If browserTab.Closed OrElse browserTab.IsHome OrElse _isClosing Then Return
+                Sub(sender, args)
+                    If Not IsCurrentView(browserTab, view) OrElse browserTab.IsHome Then Return
                     If UrlPolicy.IsWebUrl(core.Source) Then browserTab.Address = UrlPolicy.Resolve(core.Source, _state.Settings.SearchEngine)
                     browserTab.NotifyLocation()
                     If browserTab Is _active Then UpdateChrome()
                     ScheduleSave()
                 End Sub
             AddHandler core.HistoryChanged,
-                Sub(s, e)
-                    If Not browserTab.Closed AndAlso browserTab Is _active Then UpdateChrome()
+                Sub(sender, args)
+                    If IsCurrentView(browserTab, view) AndAlso browserTab Is _active Then UpdateChrome()
                 End Sub
             AddHandler core.DocumentTitleChanged,
-                Sub(s, e)
-                    If browserTab.Closed OrElse browserTab.IsHome OrElse _isClosing Then Return
+                Sub(sender, args)
+                    If Not IsCurrentView(browserTab, view) OrElse browserTab.IsHome Then Return
                     Dim title = UrlPolicy.CleanTitle(core.DocumentTitle)
                     browserTab.Title = If(title.Length > 0, title, UrlPolicy.DisplayHost(browserTab.Address))
                     If Not browserTab.IsPrivate Then
-                        Dim entry = _state.History.FirstOrDefault(Function(p) p.Url = browserTab.Address)
+                        Dim entry = _state.History.FirstOrDefault(Function(item) item.Url = browserTab.Address)
                         If entry IsNot Nothing Then entry.Title = browserTab.Title
                     End If
                     If browserTab Is _active Then UpdateChrome()
                     ScheduleSave()
                 End Sub
-            AddHandler core.NewWindowRequested, Async Sub(s, e) Await HandleNewWindowAsync(browserTab, e)
-            AddHandler core.PermissionRequested, Async Sub(s, e) Await HandlePermissionAsync(browserTab, e)
-            AddHandler core.LaunchingExternalUriScheme,
-                Sub(s, e)
-                    e.Cancel = True
-                    Dispatcher.BeginInvoke(New Action(Sub() ShowToast("Eksterne programmer åpnes ikke fra denne forhåndsversjonen.")))
+            AddHandler core.IsDocumentPlayingAudioChanged,
+                Sub(sender, args)
+                    If IsCurrentView(browserTab, view) Then browserTab.IsPlayingAudio = core.IsDocumentPlayingAudio
                 End Sub
-            AddHandler core.WindowCloseRequested,
-                Sub(s, e)
-                    Dispatcher.BeginInvoke(New Action(Async Sub() Await CloseTabAsync(browserTab)))
+            AddHandler core.IsMutedChanged,
+                Sub(sender, args)
+                    If IsCurrentView(browserTab, view) Then browserTab.IsMuted = core.IsMuted
                 End Sub
-            AddHandler core.ProcessFailed,
-                Sub(s, e)
-                    If browserTab.Closed OrElse _isClosing Then Return
-                    browserTab.IsLoading = False
-                    browserTab.ErrorMessage = "Nettmotoren stoppet (" & e.ProcessFailedKind.ToString() & "). Velg Prøv igjen for å opprette fanen på nytt."
-                    _environment = Nothing
-                    If browserTab Is _active Then
-                        UpdateViewVisibility()
-                        UpdateChrome()
+            AddHandler core.NewWindowRequested,
+                Async Sub(sender, args)
+                    If IsCurrentView(browserTab, view) Then
+                        Await HandleNewWindowAsync(browserTab, args)
+                    Else
+                        args.Handled = True
                     End If
                 End Sub
+            AddHandler core.PermissionRequested,
+                Async Sub(sender, args)
+                    If IsCurrentView(browserTab, view) Then
+                        Await HandlePermissionAsync(browserTab, args)
+                    Else
+                        args.State = CoreWebView2PermissionState.Deny
+                    End If
+                End Sub
+            AddHandler core.LaunchingExternalUriScheme, Sub(sender, args) args.Cancel = True
+            AddHandler core.WindowCloseRequested,
+                Sub(sender, args)
+                    If IsCurrentView(browserTab, view) Then Dispatcher.BeginInvoke(New Action(Async Sub() Await CloseTabAsync(browserTab)))
+                End Sub
+            AddHandler core.ProcessFailed,
+                Sub(sender, args)
+                    If Not IsCurrentView(browserTab, view) Then Return
+                    Dim affected = If(args.ProcessFailedKind = CoreWebView2ProcessFailedKind.BrowserProcessExited, _tabs.ToArray(), New BrowserTab() {browserTab}).
+                        Select(Function(target) New With {.Target = target, .Epoch = target.ViewEpoch}).ToArray()
+                    _environment = Nothing
+                    Dispatcher.BeginInvoke(New Action(
+                        Sub()
+                            If _isClosing OrElse _fatalShutdown Then Return
+                            For Each item In affected
+                                Dim target = item.Target
+                                If target.Closed OrElse target.ViewEpoch <> item.Epoch Then Continue For
+                                ForgetTabDownloads(target)
+                                ReleaseTabView(target)
+                                target.IsLoading = False
+                                If Not target.IsHome Then target.ErrorMessage = "Nettmotoren stoppet. Velg Prøv igjen for å laste siden på nytt."
+                            Next
+                            UpdateViewVisibility()
+                            UpdateChrome()
+                        End Sub))
+                End Sub
             AddHandler core.DownloadStarting,
-                Sub(s, e)
-                    Dim operation = e.DownloadOperation
-                    _downloads(operation) = browserTab
-                    AddHandler operation.StateChanged,
-                        Sub(ds, de)
-                            If operation.State <> CoreWebView2DownloadState.InProgress Then _downloads.Remove(operation)
-                        End Sub
-                    ' Keep WebView2's native save/download UI; never auto-execute files.
+                Sub(sender, args)
+                    If IsCurrentView(browserTab, view) Then
+                        BeginDownload(browserTab, args)
+                    Else
+                        args.Cancel = True
+                    End If
                 End Sub
         End Sub
 
@@ -330,7 +414,19 @@ Namespace NovaBrowser
                 End If
                 Return
             End If
-            If browserTab.IsHome AndAlso e.Uri = "about:blank" Then Return
+            If e.Uri = "about:blank" AndAlso browserTab.HomeBlankPending Then
+                browserTab.HomeBlankPending = False
+                e.Cancel = Not browserTab.IsHome
+                Return
+            End If
+            If browserTab.IsHome Then
+                e.Cancel = e.Uri <> "about:blank"
+                Return
+            End If
+            browserTab.CurrentNavigationId = e.NavigationId
+            browserTab.DocumentVersion += 1
+            browserTab.IsSleeping = False
+            If Not e.IsRedirected Then browserTab.HasSensitivePermission = False
             browserTab.IsHome = False
             browserTab.ErrorMessage = ""
             browserTab.IsLoading = True
@@ -343,7 +439,7 @@ Namespace NovaBrowser
         End Sub
 
         Private Sub OnNavigationCompleted(browserTab As BrowserTab, e As CoreWebView2NavigationCompletedEventArgs)
-            If browserTab.Closed OrElse _isClosing OrElse browserTab.IsHome Then Return
+            If browserTab.Closed OrElse _isClosing OrElse browserTab.IsHome OrElse e.NavigationId <> browserTab.CurrentNavigationId Then Return
             browserTab.IsLoading = False
             If e.IsSuccess Then
                 Dim core = browserTab.View.CoreWebView2
@@ -375,6 +471,9 @@ Namespace NovaBrowser
 
         Private Async Function CloseTabAsync(browserTab As BrowserTab) As Task
             If browserTab Is Nothing OrElse browserTab.Closed OrElse _isClosing Then Return
+            If browserTab.IsPinned Then
+                If Not Await AskAsync("Lukk festet fane?", "Denne fanen er festet. Vil du likevel lukke den?", "Lukk fane") Then Return
+            End If
             If _downloads.Values.Any(Function(t) t Is browserTab) Then
                 If Not Await AskAsync("Lukke fanen?", "Fanen har en pågående nedlasting som kan bli avbrutt.", "Lukk fane") Then Return
             End If
@@ -384,7 +483,7 @@ Namespace NovaBrowser
         Private Sub RemoveTab(browserTab As BrowserTab)
             If browserTab.Closed Then Return
             If Not browserTab.IsPrivate Then
-                _closedTabs.Push(New SessionEntry With {.Title = browserTab.Title, .Url = browserTab.Address})
+                _closedTabs.Push(New SessionEntry With {.Title = browserTab.Title, .Url = browserTab.Address, .IsPinned = browserTab.IsPinned, .IsMuted = browserTab.IsMuted, .Zoom = browserTab.Zoom})
                 If _closedTabs.Count > 20 Then
                     Dim recent = _closedTabs.Take(20).Reverse().ToArray()
                     _closedTabs.Clear()
@@ -396,6 +495,7 @@ Namespace NovaBrowser
             Dim index = _tabs.IndexOf(browserTab)
             browserTab.Closed = True
             browserTab.NavigationVersion += 1
+            ForgetTabDownloads(browserTab)
             ReleaseTabView(browserTab)
             For Each operation In _downloads.Where(Function(kv) kv.Value Is browserTab).Select(Function(kv) kv.Key).ToArray()
                 _downloads.Remove(operation)
@@ -414,7 +514,16 @@ Namespace NovaBrowser
                 Return
             End If
             Dim saved = _closedTabs.Pop()
-            CreateTab(saved.Url)
+            Dim target = CreateTab(saved.Url, False, False)
+            If target Is Nothing Then
+                _closedTabs.Push(saved)
+                Return
+            End If
+            target.IsPinned = saved.IsPinned
+            target.IsMuted = saved.IsMuted
+            target.Zoom = saved.Zoom
+            If target.IsPinned Then _tabs.Move(_tabs.IndexOf(target), _tabs.Where(Function(item) item.IsPinned).Count() - 1)
+            TabList.SelectedItem = target
         End Sub
 
         Private Sub ScheduleSave()
@@ -423,14 +532,16 @@ Namespace NovaBrowser
             _saveTimer.Start()
         End Sub
 
-        Private Sub PersistState()
-            If _fatalShutdown OrElse Not _sessionInitialized Then Return
+        Private Function PersistState() As Boolean
+            If _fatalShutdown OrElse Not _sessionInitialized Then Return False
             Dim normal = _tabs.Where(Function(t) Not t.IsPrivate AndAlso (t.IsHome OrElse UrlPolicy.IsWebUrl(t.Address))).ToList()
             _state.Session = If(_state.Settings.RestoreSession,
-                normal.Select(Function(t) New SessionEntry With {.Title = t.Title, .Url = If(t.IsHome, UrlPolicy.HomeUrl, t.Address)}).ToList(), New List(Of SessionEntry)())
+                normal.Select(Function(t) New SessionEntry With {.Title = t.Title, .Url = If(t.IsHome, UrlPolicy.HomeUrl, t.Address), .IsPinned = t.IsPinned, .IsMuted = t.IsMuted, .Zoom = t.Zoom}).ToList(), New List(Of SessionEntry)())
             _state.ActiveSessionIndex = Math.Max(0, normal.IndexOf(_active))
-            If Not StateStore.Save(_state) AndAlso Not _isClosing Then ShowToast("Kunne ikke lagre innstillingene. Kontroller plass og tilgang til datamappen.")
-        End Sub
+            Dim saved = StateStore.Save(_state)
+            If Not saved AndAlso Not _isClosing Then ShowToast("Kunne ikke lagre innstillingene. Kontroller plass og tilgang til datamappen.")
+            Return saved
+        End Function
 
         Private Async Sub Window_Closing(sender As Object, e As CancelEventArgs)
             If _isClosing Then Return
@@ -442,14 +553,19 @@ Namespace NovaBrowser
                 End If
                 Return
             End If
-            If Not _fatalShutdown Then PersistState()
+            If Not _fatalShutdown Then
+                _state.LastExitClean = True
+                PersistState()
+            End If
             _isClosing = True
+            StopWorkbench()
             _clock.Stop()
             _saveTimer.Stop()
             _toastTimer.Stop()
             _confirmCompletion?.TrySetResult(False)
             For Each browserTab In _tabs
                 browserTab.Closed = True
+                ForgetTabDownloads(browserTab)
                 ReleaseTabView(browserTab)
             Next
         End Sub
@@ -457,6 +573,7 @@ Namespace NovaBrowser
         Friend Sub PrepareForFatalShutdown()
             ' Do not overwrite the saved session with partial crash-time state.
             _fatalShutdown = True
+            StopWorkbench()
             _allowClose = True
             _clock.Stop()
             _saveTimer.Stop()
@@ -467,6 +584,13 @@ Namespace NovaBrowser
         Private Sub ReleaseTabView(browserTab As BrowserTab)
             If browserTab Is Nothing Then Return
             Dim view As WebView2CompositionControl = browserTab.View
+            browserTab.ViewEpoch += 1
+            Dim lifetime = browserTab.InitializationCancellation
+            browserTab.InitializationCancellation = Nothing
+            lifetime?.Cancel()
+            browserTab.Initialization = Nothing
+            browserTab.IsSleeping = False
+            browserTab.IsPlayingAudio = False
             browserTab.View = Nothing
             If view Is Nothing Then Return
             Try

@@ -1,32 +1,24 @@
-NOVA / GITHUB PRO-PAKKE
-Appens kildekode: 0.2.0. Presentasjonspakke: 2026-10-04.
+NOVA 0.3.0 / WINDOWS-NETTLESER
 
-1. Pakk ut hele ZIP-filen i en NY mappe.
-2. Dobbeltklikk SE-NETTSIDEN.bat for å se landingssiden.
-3. Kontroller filene og bildene du vil dele offentlig.
-4. Installer Git for Windows dersom du ikke har det: https://git-scm.com/download/win
-5. Dobbeltklikk LAST-OPP-NOVA-TIL-GITHUB.bat.
-6. Fullfør innloggingen og kontroller endringslisten. Skriv JA for å laste opp.
-7. GitHub-siden viser README med bilder når opplastingen er ferdig.
+KILDEPAKKE: Pakk ut alt i en ny mappe. Kjor START-NOVA.cmd.
+Du trenger Windows x64, .NET 10 SDK og Microsoft WebView2 Runtime.
 
-EKSTRA NETTSIDE / GITHUB PAGES
-På GitHub: Settings > Pages > Source: GitHub Actions.
-Deretter: Actions > Publish NOVA website > Run workflow > main.
-Senere endringer i docs publiseres av den samme workflowen når Pages er aktivert.
-Detaljert guide: docs/maintainers/GITHUB-SETUP.md.
+FERDIG WINDOWS-PAKKE: Pakk ut alle filer og kjor NOVA.exe.
+.NET er inkludert i den selvstendige pakken; WebView2 Runtime er separat.
+Dette er en usignert utviklingsversjon, ikke en ferdig stabil release.
 
-BILDER
-Appbildene er merkede HTML-designforhåndsvisninger, ikke tatt av Windows-appen.
-Nettsidens PC- og mobilbilder er ekte skjermbilder av HTML-siden.
-Kjør TA-EKTE-SKJERMBILDE.bat med NOVA åpen for å ta ekte appbilder.
-Ingen bilder eller kode er lastet opp av denne pakken før du godkjenner opplastingen.
+Lukk gammel NOVA for oppgradering. Ikke kopier gamle bin/obj/out-mapper.
+Eksisterende profil brukes videre. Ta en lokal sikkerhetskopi mens appen
+ikke kjorer. IKKE last opp profilmappen til GitHub.
 
-VIKTIG
-Denne pakken forbedrer GitHub-presentasjonen, dokumentasjonen og verktøyene.
-Selve VB.NET-appen er beholdt fra 0.2.0. Den kjente rapporten om manglende
-vindusknapper er ikke rettet eller verifisert løst i denne pakken.
-Det er ikke en ferdig testet Chrome-/Firefox-erstatter eller en testet EXE.
-Windows-kompilering, Windows UI-tester og PowerShell-kjøring må bekreftes
-på Windows / i GitHub Actions. Se docs/QUALITY-REPORT.md for faktisk teststatus.
+NYTT: Native vindusknapper; fest/dupliser/demp faner via hoyreklikk;
+lokale adresseforslag; nedlastinger (Ctrl+J); fokus (Ctrl+Shift+F);
+robust lagring, valgfri fanehvile, bokmerkeutveksling og PDF/utskrift.
 
-Den nye BAT-filen bruker hjelpefilene i tools. Ikke flytt bare BAT-filen.
+TESTER: TEST-ALT.cmd. Se docs/QUALITY-REPORT.md for faktiske testresultater.
+NETTSIDE: SE-NETTSIDEN.bat.
+GITHUB: LAST-OPP-NOVA-TIL-GITHUB.bat viser endringer for du skriver JA.
+BAT-filen trenger hjelpefilene i tools; ikke flytt bare BAT-filen.
+
+Ekte appbilder og bevis: docs/assets/app-0.3.0 og docs/validation/0.3.0.
+Dette prosjektet bruker WebView2/Chromium, ikke en egen nettmotor.

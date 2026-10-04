@@ -3,35 +3,31 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="clr-namespace:NovaBrowser"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        Title="NOVA Browser" Width="1460" Height="920" MinWidth="1000" MinHeight="680"
-        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
+        Icon="/NOVA;component/Assets/Nova.ico" Title="NOVA Browser" Width="1280" Height="820" MinWidth="760" MinHeight="500"
+        WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ResizeMode="CanResize"
         Background="{DynamicResource Bg}" Foreground="{DynamicResource Text}" FontFamily="Segoe UI" FontSize="13"
         UseLayoutRounding="True" SnapsToDevicePixels="True" Loaded="Window_Loaded"
         Closing="Window_Closing" PreviewKeyDown="Window_PreviewKeyDown" StateChanged="Window_StateChanged">
-    <shell:WindowChrome.WindowChrome>
-        <shell:WindowChrome CaptionHeight="42" ResizeBorderThickness="7" CornerRadius="12" GlassFrameThickness="0" UseAeroCaptionButtons="False" />
-    </shell:WindowChrome.WindowChrome>
-    <Border x:Name="WindowFrame" Background="{DynamicResource Bg}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="12">
+    <Border x:Name="WindowFrame" Background="{DynamicResource Bg}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="0">
         <Grid x:Name="RootLayout">
             <Grid.RowDefinitions><RowDefinition Height="42" /><RowDefinition Height="*" /></Grid.RowDefinitions>
             <Grid x:Name="ShellHeader" Grid.Row="0" Margin="18,0,8,0">
-                <Grid.ColumnDefinitions><ColumnDefinition Width="285" /><ColumnDefinition Width="*" /><ColumnDefinition Width="138" /></Grid.ColumnDefinitions>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="285" /><ColumnDefinition Width="*" /><ColumnDefinition Width="170" /></Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="N" FontWeight="Bold" Foreground="{DynamicResource Accent}" FontSize="21" />
                     <TextBlock Text="N O V A" FontSize="12" FontWeight="Bold" Margin="13,0,0,0" VerticalAlignment="Center" />
-                    <Border Background="{DynamicResource Field}" CornerRadius="5" Margin="14,0,0,0" Padding="6,3"><TextBlock Text="PREVIEW 0.2" FontSize="8" Foreground="{DynamicResource Muted}" /></Border>
+                    <Border Background="{DynamicResource Field}" CornerRadius="5" Margin="14,0,0,0" Padding="6,3"><TextBlock Text="PREVIEW 0.3" FontSize="8" Foreground="{DynamicResource Muted}" /></Border>
                 </StackPanel>
                 <TextBlock x:Name="WindowCaption" Grid.Column="1" Text="Din plass på nettet." TextTrimming="CharacterEllipsis" FontSize="11" Foreground="{DynamicResource Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                    <Button Style="{StaticResource IconButton}"  FontSize="11" Click="Minimize_Click" ToolTip="Minimer" AutomationProperties.Name="Minimer vinduet" ><ui:NovaIcon Kind="Minimize" Width="13" Height="13" /></Button>
-                    <Button x:Name="MaximizeButton" Style="{StaticResource IconButton}" FontSize="11" Click="Maximize_Click" ToolTip="Maksimer / gjenopprett" AutomationProperties.Name="Maksimer eller gjenopprett vinduet" ><ui:NovaIcon x:Name="MaximizeIcon" Kind="Maximize" Width="13" Height="13" /></Button>
-                    <Button Style="{StaticResource IconButton}"  FontSize="11" Click="CloseWindow_Click" ToolTip="Lukk NOVA" AutomationProperties.Name="Lukk NOVA" ><ui:NovaIcon Kind="Close" Width="13" Height="13" /></Button>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="FocusModeButton" Content="Fokus" Padding="8,6" Click="FocusMode_Click" ToolTip="Ctrl+Shift+F" AutomationProperties.Name="Fokusmodus" />
+                    <Button Content="Ctrl K" Padding="8,6" Click="Command_Click" ToolTip="Finn faner og kommandoer" AutomationProperties.Name="Kommandoer" />
                 </StackPanel>
             </Grid>
             <Grid x:Name="ShellBody" Grid.Row="1">
-                <Grid.ColumnDefinitions><ColumnDefinition Width="66" /><ColumnDefinition x:Name="SidebarColumn" Width="238" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                <Grid.ColumnDefinitions><ColumnDefinition x:Name="RailColumn" Width="66" /><ColumnDefinition x:Name="SidebarColumn" Width="238" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                 <!-- Narrow app rail -->
-                <Border BorderBrush="{DynamicResource Stroke}" BorderThickness="0,0,1,0" Margin="0,8,0,12">
+                <Border x:Name="AppRail" BorderBrush="{DynamicResource Stroke}" BorderThickness="0,0,1,0" Margin="0,8,0,12">
                     <DockPanel Margin="12,7,11,8">
                         <StackPanel DockPanel.Dock="Bottom">
                             <Button Style="{StaticResource IconButton}"  Margin="0,7" Click="Settings_Click" ToolTip="Tilpass NOVA" AutomationProperties.Name="Innstillinger" ><ui:NovaIcon Kind="Settings" Width="19" Height="19" /></Button>
@@ -58,7 +54,7 @@
                         <Button Content="+   Ny fane" Style="{StaticResource PrimaryButton}" HorizontalContentAlignment="Left" Click="NewTab_Click" ToolTip="Ctrl+T" />
                         <Button Content="Privat fane" Margin="0,6,0,12" Click="NewPrivateTab_Click" Foreground="{DynamicResource Muted}" ToolTip="Ctrl+Shift+N" />
                     </StackPanel>
-                    <ListBox x:Name="TabList" Grid.Row="2" ItemContainerStyle="{StaticResource TabRow}" SelectionChanged="TabList_SelectionChanged" PreviewMouseDown="TabList_PreviewMouseDown" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox x:Name="TabList" Grid.Row="2" ItemContainerStyle="{StaticResource TabRow}" SelectionChanged="TabList_SelectionChanged" PreviewMouseDown="TabList_PreviewMouseDown" PreviewMouseRightButtonUp="TabList_ContextMenu" ScrollViewer.VerticalScrollBarVisibility="Auto">
                         <ListBox.ItemTemplate><DataTemplate>
                             <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="27" /><ColumnDefinition Width="*" /><ColumnDefinition Width="24" /></Grid.ColumnDefinitions>
                                 <ui:NovaIcon Kind="{Binding IconKind}" Foreground="{DynamicResource Accent}" Width="18" Height="18" />
@@ -87,7 +83,7 @@
                         <Border Grid.Column="1" Background="{DynamicResource Field}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="14" Height="48" VerticalAlignment="Center" Margin="6,0">
                             <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="39" /><ColumnDefinition Width="*" /><ColumnDefinition Width="36" /></Grid.ColumnDefinitions>
                                 <Button x:Name="ConnectionButton" Style="{StaticResource IconButton}"  Width="35" Height="35" FontSize="13" Click="Connection_Click" AutomationProperties.Name="Vis tilkoblingsinformasjon" ><ui:NovaIcon x:Name="ConnectionIcon" Kind="Globe" Width="15" Height="15" /></Button>
-                                <TextBox x:Name="AddressBox" Grid.Column="1" Style="{StaticResource AddressInput}" KeyDown="AddressBox_KeyDown" GotKeyboardFocus="AddressBox_GotKeyboardFocus" AutomationProperties.Name="Nettadresse eller søk" />
+                                <TextBox x:Name="AddressBox" Grid.Column="1" Style="{StaticResource AddressInput}" KeyDown="AddressBox_KeyDown" TextChanged="AddressBox_TextChanged" GotKeyboardFocus="AddressBox_GotKeyboardFocus" AutomationProperties.Name="Nettadresse eller søk" />
                                 <Button x:Name="BookmarkButton" Grid.Column="2" Style="{StaticResource IconButton}"  Width="32" Height="33" FontSize="14" Click="BookmarkCurrent_Click" ToolTip="Legg til / fjern bokmerke (Ctrl+D)" AutomationProperties.Name="Bokmerk siden" ><ui:NovaIcon x:Name="BookmarkIcon" Kind="Star" Width="16" Height="16" /></Button>
                             </Grid>
                         </Border>
@@ -171,12 +167,31 @@
                     </DockPanel>
                 </Grid>
             </Grid>
+            <Popup x:Name="AddressSuggestions" PlacementTarget="{Binding ElementName=AddressBox}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="None">
+                <Border Width="{Binding ActualWidth, ElementName=AddressBox}" MinWidth="240" Background="{DynamicResource Elevated}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="12" Padding="7">
+                    <ListBox x:Name="SuggestionList" MaxHeight="320" MouseLeftButtonUp="SuggestionList_Click" KeyDown="SuggestionList_KeyDown" AutomationProperties.Name="Lokale adresseforslag">
+                        <ListBox.ItemTemplate><DataTemplate><StackPanel Margin="7,8"><TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" /><TextBlock Text="{Binding Detail}" Style="{StaticResource MutedText}" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" /></StackPanel></DataTemplate></ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </Popup>
             <!-- Settings and library drawer -->
-            <Grid x:Name="DrawerLayer" shell:WindowChrome.IsHitTestVisibleInChrome="True" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle" Grid.RowSpan="2" Visibility="Collapsed" Panel.ZIndex="20">
+            <Grid x:Name="DrawerLayer" shell:WindowChrome.IsHitTestVisibleInChrome="True" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle" Grid.Row="1" Visibility="Collapsed" Panel.ZIndex="20">
                 <Border Background="#88000000" MouseLeftButtonDown="DrawerBackdrop_Click" />
-                <Border x:Name="DrawerCard" Width="430" HorizontalAlignment="Right" Background="{DynamicResource Panel}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1,0,0,0" Padding="28,24">
+                <Border x:Name="DrawerCard" Width="430" MaxWidth="{Binding ActualWidth, ElementName=RootLayout}" HorizontalAlignment="Right" Background="{DynamicResource Panel}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1,0,0,0" Padding="28,24">
                     <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                         <DockPanel Margin="0,0,0,16"><Button DockPanel.Dock="Right" Style="{StaticResource IconButton}"  Click="CloseDrawer_Click" AutomationProperties.Name="Lukk panelet" ><ui:NovaIcon Kind="Close" Width="19" Height="19" /></Button><TextBlock x:Name="DrawerTitle" Text="Gjør NOVA til din." FontSize="23" FontWeight="SemiBold" VerticalAlignment="Center" /></DockPanel>
+                        <Grid x:Name="DownloadsPanel" Grid.Row="1" Visibility="Collapsed">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                            <TextBlock x:Name="DownloadsHint" Text="Ingen nedlastinger i denne økten." Style="{StaticResource MutedText}" Margin="0,0,0,16" />
+                            <ListBox x:Name="DownloadList" Grid.Row="1" ScrollViewer.VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch" AutomationProperties.Name="Nedlastinger">
+                                <ListBox.ItemTemplate><DataTemplate><Border Background="{DynamicResource Field}" CornerRadius="12" Padding="14" Margin="0,4,0,8"><StackPanel>
+                                    <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Status}" Style="{StaticResource MutedText}" Margin="0,8,0,8" />
+                                    <ProgressBar Height="3" Maximum="100" Value="{Binding Percent}" IsIndeterminate="{Binding UnknownSize}" />
+                                    <WrapPanel Margin="0,10,0,0"><Button Content="{Binding ControlLabel}" IsEnabled="{Binding IsActive}" Click="DownloadPause_Click" Padding="9,6" /><Button Content="Avbryt" IsEnabled="{Binding IsActive}" Click="DownloadCancel_Click" Padding="9,6" /><Button Content="Vis i mappe" IsEnabled="{Binding IsComplete}" Click="DownloadReveal_Click" Padding="9,6" /></WrapPanel>
+                                </StackPanel></Border></DataTemplate></ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
                         <ScrollViewer x:Name="SettingsScroller" Grid.Row="1" VerticalScrollBarVisibility="Auto">
                             <StackPanel Margin="0,0,10,20">
                                 <TextBlock Text="Små detaljer. Din personlighet." Style="{StaticResource MutedText}" />
@@ -192,6 +207,9 @@
                                 <TextBlock Text="UTSEENDE OG BEVEGELSE" Style="{StaticResource LabelText}" />
                                 <CheckBox x:Name="AnimationsSetting" Content="Myke animasjoner" Checked="Preferences_Changed" Unchecked="Preferences_Changed" />
                                 <CheckBox x:Name="ClockSetting" Content="Vis klokken" Checked="Preferences_Changed" Unchecked="Preferences_Changed" />
+                                <CheckBox x:Name="MaximizedSetting" Content="Start maksimert" Checked="Preferences_Changed" Unchecked="Preferences_Changed" />
+                                <CheckBox x:Name="SleepSetting" Content="La ubrukte faner hvile etter 15 minutter" Checked="Preferences_Changed" Unchecked="Preferences_Changed" />
+                                <TextBlock Text="Valgfritt. Lyd, nedlastinger og tillatelser beskyttes. Live-oppdateringer i andre bakgrunnsfaner kan pauses." Style="{StaticResource MutedText}" />
                                 <CheckBox x:Name="CompactSetting" Content="Tettere faneliste" Checked="Preferences_Changed" Unchecked="Preferences_Changed" />
                                 <TextBlock Text="SØK OG OPPSTART" Style="{StaticResource LabelText}" />
                                 <ComboBox x:Name="SearchSetting" SelectionChanged="Preferences_Changed" AutomationProperties.Name="Søkemotor" />
@@ -202,11 +220,13 @@
                                 <Button Content="Åpne oppstartsveiviseren" HorizontalAlignment="Left" Margin="0,14,0,0" Click="RestartSetup_Click" />
                                 <TextBlock Text="DINE DATA" Style="{StaticResource LabelText}" />
                                 <TextBlock Text="Innstillinger, bokmerker og NOVAs besøksliste lagres lokalt. Nettmotoren kan også lagre data i vanlige faner. Private faner tas ikke med i historikk eller gjenoppretting. Privat betyr ikke anonym på nettet." Style="{StaticResource MutedText}" />
+                                <Button Content="Eksporter bokmerker til JSON" HorizontalAlignment="Left" Click="ExportBookmarks_Click" />
+                                <Button Content="Importer bokmerker fra JSON" HorizontalAlignment="Left" Click="ImportBookmarks_Click" />
                                 <Button Content="Slett historikken" HorizontalAlignment="Left" Margin="0,12,0,0" Click="ClearHistory_Click" />
                                 <Button x:Name="ClearDataButton" Content="Slett informasjonskapsler og nettstedsdata" Foreground="{DynamicResource Danger}" HorizontalAlignment="Left" Click="ClearSiteData_Click" />
                                 <TextBlock Text="Dette logger deg ut av nettsteder. Bokmerkene beholdes." Style="{StaticResource MutedText}" Margin="0,4,0,0" />
                                 <TextBlock Text="OM NOVA" Style="{StaticResource LabelText}" />
-                                <TextBlock Text="NOVA 0.2.0 · utviklingsversjon
+                                <TextBlock Text="NOVA 0.3.0 · utviklingsversjon
 Visual Basic .NET + WPF + WebView2
 Ingen egen sky eller kontotjeneste." Style="{StaticResource MutedText}" />
                                 <TextBlock Text="Utvidelser, synkronisering og automatiske appoppdateringer er ikke inkludert." Style="{StaticResource MutedText}" Margin="0,9,0,0" />
@@ -228,9 +248,9 @@ Ingen egen sky eller kontotjeneste." Style="{StaticResource MutedText}" />
                 </Border>
             </Grid>
             <!-- Native command palette -->
-            <Grid x:Name="CommandLayer" shell:WindowChrome.IsHitTestVisibleInChrome="True" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle" Grid.RowSpan="2" Visibility="Collapsed" Panel.ZIndex="30">
+            <Grid x:Name="CommandLayer" shell:WindowChrome.IsHitTestVisibleInChrome="True" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle" Grid.Row="1" Visibility="Collapsed" Panel.ZIndex="30">
                 <Border Background="#AA000000" MouseLeftButtonDown="CommandBackdrop_Click" />
-                <Border x:Name="CommandCard" Width="580" MaxHeight="580" VerticalAlignment="Top" Margin="0,110,0,40" Background="{DynamicResource Elevated}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="20" Padding="23">
+                <Border x:Name="CommandCard" Width="580" MaxWidth="{Binding ActualWidth, ElementName=RootLayout}" MaxHeight="580" VerticalAlignment="Top" Margin="0,110,0,40" Background="{DynamicResource Elevated}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="20" Padding="23">
                     <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                         <DockPanel Margin="0,0,0,15"><TextBlock Text="Hva vil du gjøre?" FontSize="21" FontWeight="SemiBold" /><TextBlock Text="ESC" HorizontalAlignment="Right" FontSize="10" Foreground="{DynamicResource Muted}" VerticalAlignment="Center" /></DockPanel>
                         <TextBox x:Name="CommandSearchBox" Grid.Row="1" TextChanged="CommandSearch_TextChanged" PreviewKeyDown="CommandSearch_KeyDown" AutomationProperties.Name="Søk etter kommando, fane eller nettadresse" />
@@ -245,7 +265,7 @@ Ingen egen sky eller kontotjeneste." Style="{StaticResource MutedText}" />
                   shell:WindowChrome.IsHitTestVisibleInChrome="True"
                   KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle"
                   FocusManager.IsFocusScope="True" Background="#C9000000">
-                <Border x:Name="SetupCard" MaxWidth="900" Height="560" Margin="30,18,30,18"
+                <Border x:Name="SetupCard" MaxWidth="900" MaxHeight="560" Margin="30,18,30,18"
                         HorizontalAlignment="Stretch" VerticalAlignment="Center" CornerRadius="24"
                         Background="{DynamicResource Elevated}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1">
                     <Grid>
@@ -338,13 +358,13 @@ Ingen egen sky eller kontotjeneste." Style="{StaticResource MutedText}" />
                 </Border>
             </Grid>
             <!-- Host-managed permission/confirmation UI: never exposed to page script. -->
-            <Grid x:Name="ConfirmLayer" shell:WindowChrome.IsHitTestVisibleInChrome="True" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle" Grid.RowSpan="2" Visibility="Collapsed" Panel.ZIndex="40">
+            <Grid x:Name="ConfirmLayer" shell:WindowChrome.IsHitTestVisibleInChrome="True" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.ControlTabNavigation="Cycle" Grid.Row="1" Visibility="Collapsed" Panel.ZIndex="40">
                 <Border Background="#BB000000" />
                 <Border Width="500" Background="{DynamicResource Elevated}" BorderBrush="{DynamicResource Stroke}" BorderThickness="1" CornerRadius="20" Padding="28" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <StackPanel><TextBlock Text="NOVA / BEKREFTELSE" FontSize="10" Foreground="{DynamicResource Accent}" FontWeight="SemiBold" /><TextBlock x:Name="ConfirmTitle" FontSize="23" FontWeight="SemiBold" Margin="0,15,0,13" TextWrapping="Wrap" /><TextBlock x:Name="ConfirmDetail" FontSize="13" Foreground="{DynamicResource Muted}" TextWrapping="Wrap" /><StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,23,0,0"><Button x:Name="ConfirmNoButton" Content="Avbryt" Click="ConfirmNo_Click" Margin="0,0,10,0" /><Button x:Name="ConfirmYesButton" Content="Tillat" Style="{StaticResource PrimaryButton}" Click="ConfirmYes_Click" /></StackPanel></StackPanel>
                 </Border>
             </Grid>
-            <Border x:Name="ToastCard" Grid.RowSpan="2" Panel.ZIndex="50" Visibility="Collapsed" Background="{DynamicResource Elevated}" BorderBrush="{DynamicResource Accent}" BorderThickness="1" CornerRadius="13" Padding="18,13" MaxWidth="560" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="28,0,28,40" IsHitTestVisible="False">
+            <Border x:Name="ToastCard" Grid.Row="1" Panel.ZIndex="50" Visibility="Collapsed" Background="{DynamicResource Elevated}" BorderBrush="{DynamicResource Accent}" BorderThickness="1" CornerRadius="13" Padding="18,13" MaxWidth="560" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="28,0,28,40" IsHitTestVisible="False">
                 <TextBlock x:Name="ToastText" TextWrapping="Wrap" FontSize="12" />
             </Border>
         </Grid>
