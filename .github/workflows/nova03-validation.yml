@@ -30,11 +30,18 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python engineering/refine03.py 2>&1 | Tee-Object artifacts/refinement.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python engineering/lifecycle03.py 2>&1 | Tee-Object artifacts/lifecycle.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Static source and package checks
         run: |
           python tools/check_source.py 2>&1 | Tee-Object artifacts/source-checks.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/check_package.py 2>&1 | Tee-Object artifacts/package-checks.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload BAT integration against disposable LOCAL remotes
+        shell: powershell
+        run: |
+          .\tests\Upload.Tests.ps1 2>&1 | Tee-Object artifacts/upload-tests.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Pure VB policies and profile recovery
         run: |
@@ -56,6 +63,16 @@ jobs:
       - name: Publish unsigned Windows x64 candidate
         run: |
           dotnet publish src/NovaBrowser/NovaBrowser.vbproj -c Release -r win-x64 --self-contained true -o out/win-x64 -p:PublishSingleFile=false 2>&1 | Tee-Object artifacts/publish.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Document observed results and real screenshots
+        run: |
+          python engineering/present03.py 2>&1 | Tee-Object artifacts/presentation.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/check_source.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/check_package.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --check docs/assets/site.js
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Preserve proposed source and exact build metadata
         if: always()
