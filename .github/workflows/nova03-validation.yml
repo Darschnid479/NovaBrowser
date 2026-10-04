@@ -1,0 +1,80 @@
+name: NOVA 0.3 development validation
+on:
+  push:
+    branches: ['work/nova-0.3.0']
+    paths: ['.github/workflows/nova03-validation.yml', 'engineering/run03.txt']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: nova03-validation
+  cancel-in-progress: true
+env:
+  PYTHONUTF8: '1'
+  DOTNET_NOLOGO: '1'
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Materialize proposed source in disposable checkout
+        run: |
+          New-Item -ItemType Directory -Force artifacts | Out-Null
+          python engineering/apply03.py 2>&1 | Tee-Object artifacts/migration.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Static source and package checks
+        run: |
+          python tools/check_source.py 2>&1 | Tee-Object artifacts/source-checks.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/check_package.py 2>&1 | Tee-Object artifacts/package-checks.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Pure VB policies and profile recovery
+        run: |
+          dotnet run --project tests/NovaBrowser.Checks/NovaBrowser.Checks.vbproj -c Release 2>&1 | Tee-Object artifacts/policy-tests.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: WPF vector and text layout checks
+        run: |
+          dotnet run --project tests/NovaBrowser.UiChecks/NovaBrowser.UiChecks.vbproj -c Release 2>&1 | Tee-Object artifacts/layout-tests.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Compile complete browser
+        run: |
+          dotnet build NOVA.sln -c Release 2>&1 | Tee-Object artifacts/build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Publish unsigned Windows x64 candidate
+        run: |
+          dotnet publish src/NovaBrowser/NovaBrowser.vbproj -c Release -r win-x64 --self-contained true -o out/win-x64 -p:PublishSingleFile=false 2>&1 | Tee-Object artifacts/publish.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve proposed source and exact build metadata
+        if: always()
+        shell: python
+        run: |
+          import pathlib, zipfile, hashlib, json, os
+          root=pathlib.Path('.')
+          target=root/'artifacts'
+          target.mkdir(exist_ok=True)
+          excluded={'.git','bin','obj','out','artifacts','engineering','__pycache__'}
+          paths=sorted(p for p in root.rglob('*') if p.is_file() and not any(part in excluded for part in p.parts) and p.name!='nova03-validation.yml')
+          with zipfile.ZipFile(target/'candidate-source.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for path in paths: z.write(path, 'NOVA-0.3.0/'+path.as_posix())
+          data={'commit':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'files':{p.as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}}
+          (target/'source-manifest.json').write_text(json.dumps(data,indent=2),encoding='utf-8')
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: NOVA03-validation-evidence
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v7
+        if: success()
+        with:
+          name: NOVA03-unsigned-win-x64
+          path: out/win-x64/
+          if-no-files-found: error
+          retention-days: 14
