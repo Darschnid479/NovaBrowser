@@ -28,6 +28,8 @@ jobs:
           New-Item -ItemType Directory -Force artifacts | Out-Null
           python engineering/apply03.py 2>&1 | Tee-Object artifacts/migration.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python engineering/refine03.py 2>&1 | Tee-Object artifacts/refinement.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Static source and package checks
         run: |
           python tools/check_source.py 2>&1 | Tee-Object artifacts/source-checks.log
@@ -42,9 +44,14 @@ jobs:
         run: |
           dotnet run --project tests/NovaBrowser.UiChecks/NovaBrowser.UiChecks.vbproj -c Release 2>&1 | Tee-Object artifacts/layout-tests.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Compile complete browser
+      - name: Compile complete browser and integration tests
         run: |
           dotnet build NOVA.sln -c Release 2>&1 | Tee-Object artifacts/build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Real WPF window and WebView2 integration checks
+        timeout-minutes: 8
+        run: |
+          dotnet run --project tests/NovaBrowser.ShellChecks/NovaBrowser.ShellChecks.vbproj -c Release --no-build -- artifacts/wpf --live 2>&1 | Tee-Object artifacts/shell-tests.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Publish unsigned Windows x64 candidate
         run: |
